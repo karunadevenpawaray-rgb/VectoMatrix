@@ -85,6 +85,8 @@ ON CONFLICT (id) DO NOTHING;
 -- When a user registers their auth user, executing:
 --   INSERT INTO public.super_admins (auth_id, email) VALUES ('<USER_AUTH_ID>', 'admin@vectomatrix.com');
 -- will link them as Super Admin.
-INSERT INTO public.super_admins (id, auth_id, email) VALUES
-('99999999-9999-9999-9999-999999999999', '00000000-0000-0000-0000-000000000000', 'admin@vectomatrix.com')
-ON CONFLICT (id) DO NOTHING;
+--
+-- Original query commented out to avoid foreign key (auth_id) constraints:
+-- INSERT INTO public.super_admins (id, auth_id, email) VALUES
+-- ('99999999-9999-9999-9999-999999999999', '00000000-0000-0000-0000-000000000000', 'admin@vectomatrix.com')
+-- ON CONFLICT (id) DO NOTHING;
