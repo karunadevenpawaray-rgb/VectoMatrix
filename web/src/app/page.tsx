@@ -626,7 +626,9 @@ export default function Home() {
             <button
               id="toggle-filters-btn"
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm transition-all ${showFilters
+              aria-label="Toggle search and filter panel"
+              aria-expanded={showFilters}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm transition-all focus-visible:ring-2 focus-visible:ring-[#ea580c] focus-visible:outline-none ${showFilters
                   ? "bg-[#ea580c] text-white shadow-sm shadow-orange-500/30"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
@@ -639,6 +641,7 @@ export default function Home() {
               <select
                 value={sortBy}
                 onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+                aria-label="Sort packages by"
                 className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40 cursor-pointer"
               >
                 <option value="recommended">⭐ Recommended</option>
@@ -651,14 +654,16 @@ export default function Home() {
                 <button
                   id="view-grid-btn"
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-white shadow-sm text-[#ea580c]" : "text-slate-400 hover:text-slate-700"}`}
+                  aria-label="Switch to grid layout"
+                  className={`p-2 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-[#ea580c] focus-visible:outline-none ${viewMode === "grid" ? "bg-white shadow-sm text-[#ea580c]" : "text-slate-400 hover:text-slate-700"}`}
                 >
                   <LayoutGrid size={17} />
                 </button>
                 <button
                   id="view-list-btn"
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-white shadow-sm text-[#ea580c]" : "text-slate-400 hover:text-slate-700"}`}
+                  aria-label="Switch to list layout"
+                  className={`p-2 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-[#ea580c] focus-visible:outline-none ${viewMode === "list" ? "bg-white shadow-sm text-[#ea580c]" : "text-slate-400 hover:text-slate-700"}`}
                 >
                   <List size={17} />
                 </button>
@@ -897,6 +902,7 @@ export default function Home() {
                                 checked={isComparing}
                                 onChange={() => togglePackage(pkg)}
                                 onClick={(e) => e.stopPropagation()}
+                                aria-label={`Compare ${pkg.title}`}
                                 className="w-3.5 h-3.5 accent-orange-500 rounded"
                               />
                               <span className="text-[11px] font-black uppercase tracking-wider">Compare</span>
@@ -967,7 +973,8 @@ export default function Home() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl font-black text-sm text-slate-700 disabled:opacity-40 hover:border-[#ea580c] hover:text-[#ea580c] transition-all shadow-sm active:scale-95"
+                  aria-label="Previous page"
+                  className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl font-black text-sm text-slate-700 disabled:opacity-40 hover:border-[#ea580c] hover:text-[#ea580c] transition-all shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-[#ea580c] focus-visible:outline-none"
                 >
                   <ChevronLeft size={16} /> Previous
                 </button>
@@ -977,7 +984,8 @@ export default function Home() {
                 <button
                   onClick={() => setCurrentPage((p) => p + 1)}
                   disabled={packages.length < itemsPerPage}
-                  className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl font-black text-sm text-slate-700 disabled:opacity-40 hover:border-[#ea580c] hover:text-[#ea580c] transition-all shadow-sm active:scale-95"
+                  aria-label="Next page"
+                  className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl font-black text-sm text-slate-700 disabled:opacity-40 hover:border-[#ea580c] hover:text-[#ea580c] transition-all shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-[#ea580c] focus-visible:outline-none"
                 >
                   Next <ChevronRight size={16} />
                 </button>

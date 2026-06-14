@@ -105,8 +105,32 @@ export default function PackageDetail() {
   const activeRoomPrice = pkg.base_price_mur + (activeRoomIndex >= 0 ? activeRoomIndex * 2000 : 0);
   const totalCalculatedMUR = activeRoomPrice * (adults * 1.0 + teens * 0.75 + children * 0.5);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": pkg.title,
+    "image": galleryImages[0],
+    "description": pkg.description || pkg.title,
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "MUR",
+      "price": pkg.base_price_mur,
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": "https://schema.org/InStock"
+    },
+    "provider": {
+      "@type": "TravelAgency",
+      "name": pkg.agency?.name || "True Memories Travel & Tours",
+      "telephone": "+230 58 16 94 20"
+    }
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen font-[family-name:var(--font-outfit)] pb-32">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero Header */}
       <div className="relative h-[260px] md:h-[340px] w-full mt-16 md:mt-0 bg-slate-950">
         <img src={galleryImages[0]} alt={pkg.title} className="w-full h-full object-cover opacity-80" />
