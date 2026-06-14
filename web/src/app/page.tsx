@@ -152,21 +152,73 @@ export default function Home() {
     { name: "Maldives",     emoji: "🤿", dest: "MALDIVES",     img: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=600" },
   ];
 
-  /* ─── Per-package fallback image map ─── */
-  const destImage: Record<string, string> = {
-    DUBAI:        "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=600",
-    MALAYSIA:     "https://images.unsplash.com/photo-1596422846543-75c6ff416766?auto=format&fit=crop&q=80&w=600",
-    MALDIVES:     "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=600",
-    SOUTH_AFRICA: "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&q=80&w=600",
-    RODRIGUES:    "https://images.unsplash.com/photo-1589394815804-964ce0ff96b8?auto=format&fit=crop&q=80&w=600",
-    REUNION:      "https://images.unsplash.com/photo-1552554746-9d33261971dd?auto=format&fit=crop&q=80&w=600",
+  /* ─── Per-destination curated image pool (multiple per destination for variety) ─── */
+  const destImages: Record<string, string[]> = {
+    DUBAI: [
+      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=800", // Burj Khalifa skyline
+      "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&q=80&w=800", // Dubai Marina
+      "https://images.unsplash.com/photo-1548199569-3e1c6aa8f469?auto=format&fit=crop&q=80&w=800", // Dubai desert dunes
+      "https://images.unsplash.com/photo-1577724893765-2ec9484acfb5?auto=format&fit=crop&q=80&w=800", // Dubai at night
+    ],
+    MALAYSIA: [
+      "https://images.unsplash.com/photo-1596422846543-75c6ff416766?auto=format&fit=crop&q=80&w=800", // KL Petronas towers
+      "https://images.unsplash.com/photo-1555400038-063f5f1a5cb3?auto=format&fit=crop&q=80&w=800", // KL skyline dusk
+      "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&q=80&w=800", // Langkawi beach
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800", // Malaysian rainforest
+    ],
+    SOUTH_AFRICA: [
+      "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&q=80&w=800", // Cape Town Table Mountain
+      "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&q=80&w=800", // African lion safari
+      "https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&q=80&w=800", // Kruger Park safari
+      "https://images.unsplash.com/photo-1531804226-23eb1b1cddbe?auto=format&fit=crop&q=80&w=800", // Cape Town aerial
+    ],
+    RODRIGUES: [
+      "https://images.unsplash.com/photo-1589394815804-964ce0ff96b8?auto=format&fit=crop&q=80&w=800", // Rodrigues lagoon
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800", // tropical beach
+      "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80&w=800", // island paradise
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=800", // ocean beach
+    ],
+    REUNION: [
+      "https://images.unsplash.com/photo-1552554746-9d33261971dd?auto=format&fit=crop&q=80&w=800", // Réunion volcano
+      "https://images.unsplash.com/photo-1596524430615-b46475ddff6e?auto=format&fit=crop&q=80&w=800", // Réunion coast
+      "https://images.unsplash.com/photo-1467220369-2081f2a53bc9?auto=format&fit=crop&q=80&w=800", // tropical waterfall
+      "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80&w=800", // island aerial
+    ],
+    MALDIVES: [
+      "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=800", // overwater bungalows
+      "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&q=80&w=800", // crystal water
+      "https://images.unsplash.com/photo-1540202404-d0f7b90b3028?auto=format&fit=crop&q=80&w=800", // Maldives aerial
+      "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&q=80&w=800", // Maldives sunset
+    ],
   };
 
-  const pkgImage = (pkg: any) =>
-    pkg.gallery_images?.[0] ||
-    pkg.image_url ||
-    destImage[pkg.destination] ||
-    "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=600";
+  /* ─── Robust image resolver — case-insensitive, rotates by pkg.id, never shows plane interior ─── */
+  const pkgImage = (pkg: any): string => {
+    // 1. Use actual package image if present and looks valid
+    const direct = pkg.gallery_images?.[0] || pkg.image_url;
+    if (direct && typeof direct === "string" && direct.startsWith("http")) return direct;
+    // 2. Destination-based fallback (case-insensitive)
+    const key = String(pkg.destination || "").toUpperCase().replace(/\s+/g, "_");
+    const imgs = destImages[key];
+    if (imgs && imgs.length > 0) {
+      // Rotate by id so each card shows a different image for the same destination
+      const idx = Math.abs((pkg.id || 0)) % imgs.length;
+      return imgs[idx];
+    }
+    // 3. Generic scenic travel fallback (NOT a plane interior)
+    return "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=800";
+  };
+
+  /* ─── Per-pkg onError: loads destination-specific image, prevents infinite loops ─── */
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>, pkg: any) => {
+    const key = String(pkg.destination || "").toUpperCase().replace(/\s+/g, "_");
+    const imgs = destImages[key];
+    const fallback = imgs?.[0] || "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=800";
+    if (e.currentTarget.src !== fallback) {
+      e.currentTarget.src = fallback;
+    }
+    e.currentTarget.onerror = null; // prevent infinite error loop
+  };
 
   /* ────────────────────────────────────────────── */
   /*  RENDER                                        */
@@ -387,11 +439,12 @@ export default function Home() {
                         onClick={() => router.push(`/package/${pkg.id}`)}
                         className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group border border-slate-100/80"
                       >
-                        {/* Image */}
+                        {/* Image — uses shared pkgImage() resolver */}
                         <div className="relative h-64 overflow-hidden">
                           <img
-                            src={pkg.gallery_images?.[0] || destImage[pkg.destination] || "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=800"}
+                            src={pkgImage(pkg)}
                             alt={pkg.title}
+                            onError={(e) => handleImgError(e, pkg)}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
@@ -704,7 +757,7 @@ export default function Home() {
                           <img
                             src={img}
                             alt={pkg.title}
-                            onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=600"; }}
+                            onError={(e) => handleImgError(e, pkg)}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -775,7 +828,7 @@ export default function Home() {
                         <img
                           src={img}
                           alt={pkg.title}
-                          onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=600"; }}
+                          onError={(e) => handleImgError(e, pkg)}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-black text-slate-800">
