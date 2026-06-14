@@ -1,0 +1,51 @@
+name: VectoMatrix CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    # --- WEB APP (Consumer Portal) ---
+    - name: Install Web Dependencies
+      run: cd web && npm ci
+
+    - name: Typecheck Web App
+      run: cd web && npx tsc --noEmit
+
+    - name: Build Web App
+      run: cd web && npm run build
+
+    # --- ADMIN APP (Vendor SaaS) ---
+    - name: Install Admin Dependencies
+      run: cd admin && npm ci
+
+    - name: Typecheck Admin App
+      run: cd admin && npx tsc --noEmit
+
+    - name: Build Admin App
+      run: cd admin && npm run build
+
+    # --- MOBILE APP (Expo React Native) ---
+    - name: Install Mobile Dependencies
+      run: cd mobile && npm ci
+
+    - name: Typecheck Mobile App
+      run: cd mobile && npx tsc --noEmit
+
+    # Mobile build is skipped in CI due to Expo EAS requirements, 
+    # but typechecking ensures codebase integrity.
