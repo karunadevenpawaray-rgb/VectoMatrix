@@ -27,7 +27,7 @@ export default function RootLayout({
         <I18nProvider>
           <CompareProvider>
             <Navbar />
-            <main className="flex-1 bg-slate-50">
+            <main className="flex-1 bg-white">
               {children}
             </main>
             <Footer />

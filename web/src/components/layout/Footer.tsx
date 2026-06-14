@@ -1,86 +1,146 @@
-import React from 'react';
-import { Globe, Camera, Music, MessageCircle, Phone } from 'lucide-react';
-import Link from 'next/link';
+import React from "react";
+import { Globe, Camera, Music, MessageCircle, Phone, Mail } from "lucide-react";
+// Note: Facebook, Instagram, Youtube, MapPin not available in this lucide-react version — using Globe/Camera/Music/MessageCircle instead
+import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#0a0f1c] pt-10 pb-6 text-slate-400 text-xs mt-auto font-[family-name:var(--font-outfit)]">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
-        {/* Column 1 */}
-        <div className="flex flex-col md:col-span-4 lg:col-span-3">
-          <div className="flex items-center mb-4 text-white">
-            <div className="w-5 h-5 rounded-full border border-white border-dashed animate-spin-slow flex items-center justify-center mr-2">
-              <div className="w-1 h-1 bg-white rounded-full"></div>
-            </div>
-            <span className="text-base font-black tracking-tight">TRUE<span className="text-slate-300">MEMORIES</span></span>
+    <footer className="w-full bg-white border-t border-slate-100 pt-16 pb-8 text-slate-600 font-[family-name:var(--font-outfit)]">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
+
+        {/* ── Column 1: Brand & Contact ── */}
+        <div className="flex flex-col md:col-span-4">
+          <div className="flex flex-col mb-5">
+            <span className="text-2xl font-black text-slate-900 leading-none tracking-tighter">
+              TRUE<span className="text-slate-400">MEMORIES</span>
+            </span>
+            <span className="text-[11px] font-black text-[#ea580c] uppercase tracking-[0.15em] mt-1">
+              Travel &amp; Tours
+            </span>
           </div>
-          <p className="mb-4 leading-relaxed text-slate-400 text-[11px]">
-            True Memories Travel & Tours — a bridge between traveler and tours and holidays. Experience safe, secure and memorable vacations with our IATA accredited experts.
+          <p className="text-sm text-slate-500 leading-relaxed mb-6 max-w-xs">
+            A bridge between traveller &amp; tours and holidays. Safe, secure and memorable vacations with our IATA accredited experts.
           </p>
-          <div className="flex gap-2">
-            <button className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center hover:bg-slate-700 transition-colors text-white">
-              <Globe size={14} />
-            </button>
-            <button className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center hover:bg-slate-700 transition-colors text-white">
-              <Camera size={14} />
-            </button>
-            <button className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center hover:bg-slate-700 transition-colors text-white">
-              <Music size={14} />
-            </button>
-            <button className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center hover:bg-slate-700 transition-colors text-white">
-              <MessageCircle size={14} />
-            </button>
+
+          {/* Contact details */}
+          <div className="space-y-3">
+            <a href="tel:+23058169420" className="flex items-center gap-3 text-sm font-semibold text-slate-700 hover:text-[#ea580c] transition-colors group">
+              <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-[#ea580c] group-hover:bg-[#ea580c] group-hover:text-white transition-colors shrink-0">
+                <Phone size={14} />
+              </div>
+              +230 58 16 94 20
+            </a>
+            <a href="mailto:karunadevenpawaray@gmail.com" className="flex items-center gap-3 text-sm font-semibold text-slate-700 hover:text-[#ea580c] transition-colors group">
+              <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-[#ea580c] group-hover:bg-[#ea580c] group-hover:text-white transition-colors shrink-0">
+                <Mail size={14} />
+              </div>
+              <span className="truncate">karunadevenpawaray@gmail.com</span>
+            </a>
+            <a href="https://vectomatrix.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm font-semibold text-slate-700 hover:text-[#ea580c] transition-colors group">
+              <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-[#ea580c] group-hover:bg-[#ea580c] group-hover:text-white transition-colors shrink-0">
+                <Globe size={14} />
+              </div>
+              vectomatrix.com
+            </a>
+          </div>
+
+          {/* Social icons */}
+          <div className="flex gap-2 mt-6">
+            {[
+              { Icon: Globe,          label: "Website" },
+              { Icon: Camera,         label: "Instagram" },
+              { Icon: Music,          label: "TikTok" },
+              { Icon: MessageCircle,  label: "WhatsApp" },
+            ].map(({ Icon, label }) => (
+              <button
+                key={label}
+                aria-label={label}
+                className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:border-[#ea580c] hover:text-[#ea580c] transition-all hover:-translate-y-0.5"
+              >
+                <Icon size={15} />
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Column 2 */}
-        <div className="flex flex-col md:col-span-4 lg:col-span-3">
-          <h4 className="text-red-600 font-black tracking-[0.2em] uppercase text-[10px] mb-4">EXPLORE</h4>
-          <ul className="space-y-2 font-medium text-white/80">
-            <li className="flex items-center gap-2 text-[11px]"><div className="w-1 h-1 bg-red-600 rounded-full"></div> <Link href="/" className="hover:text-white transition-colors">Holiday Packages</Link></li>
-            <li className="flex items-center gap-2 text-[11px]"><div className="w-1 h-1 bg-red-600 rounded-full"></div> <Link href="/cruises" className="hover:text-white transition-colors">Luxury Cruises</Link></li>
-            <li className="flex items-center gap-2 text-[11px]"><div className="w-1 h-1 bg-red-600 rounded-full"></div> <Link href="/transfers" className="hover:text-white transition-colors">Transfers & Activities</Link></li>
-            <li className="flex items-center gap-2 text-[11px]"><div className="w-1 h-1 bg-red-600 rounded-full"></div> <Link href="/compare" className="hover:text-white transition-colors">Compare Packages</Link></li>
-            <li className="flex items-center gap-2 text-[11px]"><div className="w-1 h-1 bg-red-600 rounded-full"></div> <Link href="/dashboard" className="hover:text-white transition-colors">My Trips</Link></li>
+        {/* ── Column 2: Explore ── */}
+        <div className="flex flex-col md:col-span-2">
+          <h4 className="text-[#ea580c] font-black tracking-[0.2em] uppercase text-[11px] mb-5">Explore</h4>
+          <ul className="space-y-3">
+            {[
+              { href: "/",           label: "Holiday Packages" },
+              { href: "/cruises",    label: "Luxury Cruises" },
+              { href: "/transfers",  label: "Transfers" },
+              { href: "/activities", label: "Activities" },
+              { href: "/compare",    label: "Compare Packages" },
+              { href: "/dashboard",  label: "My Trips" },
+            ].map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="text-sm text-slate-600 hover:text-[#ea580c] transition-colors font-medium">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Column 3 */}
-        <div className="flex flex-col md:col-span-4 lg:col-span-3">
-          <h4 className="text-red-600 font-black tracking-[0.2em] uppercase text-[10px] mb-4">THE AGENCY</h4>
-          <ul className="space-y-2 font-medium text-white/80 text-[11px]">
-            <li><Link href="#" className="hover:text-white transition-colors">Our Story</Link></li>
-            <li><Link href="#" className="hover:text-white transition-colors">Expert Team</Link></li>
-            <li><Link href="#" className="hover:text-white transition-colors">Location & Map</Link></li>
-            <li><Link href="#" className="hover:text-white transition-colors">Common Questions (FAQ)</Link></li>
-            <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-            <li><Link href="#" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
+        {/* ── Column 3: Company ── */}
+        <div className="flex flex-col md:col-span-2">
+          <h4 className="text-[#ea580c] font-black tracking-[0.2em] uppercase text-[11px] mb-5">Company</h4>
+          <ul className="space-y-3">
+            {[
+              { href: "#", label: "Our Story" },
+              { href: "#", label: "Expert Team" },
+              { href: "#", label: "Location &amp; Map" },
+              { href: "#", label: "FAQ" },
+              { href: "#", label: "Privacy Policy" },
+              { href: "#", label: "Terms &amp; Conditions" },
+            ].map((link) => (
+              <li key={link.label}>
+                <Link
+                  href={link.href}
+                  className="text-sm text-slate-600 hover:text-[#ea580c] transition-colors font-medium"
+                  dangerouslySetInnerHTML={{ __html: link.label }}
+                />
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Column 4 */}
-        <div className="flex flex-col md:col-span-12 lg:col-span-3">
-          <h4 className="text-red-600 font-black tracking-[0.2em] uppercase text-[10px] mb-4">NEWSLETTER</h4>
-          <p className="text-white font-bold mb-3 text-[11px]">Subscribe for luxury travel insights.</p>
+        {/* ── Column 4: Newsletter ── */}
+        <div className="flex flex-col md:col-span-4">
+          <h4 className="text-[#ea580c] font-black tracking-[0.2em] uppercase text-[11px] mb-5">Stay Inspired</h4>
+          <p className="text-sm text-slate-600 font-medium mb-4">
+            Subscribe for exclusive travel deals, destination guides and early-access offers.
+          </p>
           <div className="flex flex-col gap-2 mb-6">
-            <input type="email" placeholder="Your email" className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-2 text-white placeholder-slate-500 font-medium focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors text-[11px]" />
-            <input type="button" value="SUBSCRIBE" className="bg-red-600 text-white font-black py-2 rounded-lg hover:bg-red-700 transition-colors active:scale-95 text-[10px] tracking-[0.1em] uppercase shadow-lg shadow-red-600/20" />
+            <input
+              type="email"
+              placeholder="Your email address"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-[#ea580c] transition"
+            />
+            <button className="w-full bg-[#ea580c] text-white font-black py-3 rounded-xl hover:bg-orange-600 transition-colors active:scale-95 text-sm tracking-wide shadow-sm shadow-orange-500/20">
+              Subscribe
+            </button>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-red-500">
-              <Phone size={14} fill="currentColor" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-0.5">Help Desk</span>
-              <span className="text-white font-black text-base tracking-tight leading-none">+230 2124070</span>
-            </div>
+
+          {/* Trust badges */}
+          <div className="flex gap-3">
+            <span className="text-[11px] font-black text-slate-400 border border-slate-200 px-3 py-1.5 rounded-lg">✓ IATA Accredited</span>
+            <span className="text-[11px] font-black text-slate-400 border border-slate-200 px-3 py-1.5 rounded-lg">✓ Since 1995</span>
           </div>
         </div>
+
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pt-6 border-t border-slate-800/50 flex flex-col items-center justify-center text-center">
-        <p className="text-[9px] font-bold tracking-[0.1em] text-slate-500 uppercase mb-1">© 2026 TRUE MEMORIES | A BRIDGE BETWEEN TRAVELER & TOURS AND HOLIDAYS. ALL RIGHTS RESERVED. | SINCE 1995</p>
-        <p className="text-[8px] font-bold tracking-[0.2em] text-slate-600 uppercase">CREATED AND PRODUCED BY DEVEN</p>
+      {/* ── Bottom bar ── */}
+      <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 font-medium">
+        <p>© 2026 True Memories Travel &amp; Tours. All rights reserved.</p>
+        <p>
+          <a href="https://vectomatrix.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#ea580c] transition-colors">
+            vectomatrix.com
+          </a>
+        </p>
       </div>
     </footer>
   );
