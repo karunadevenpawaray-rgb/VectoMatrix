@@ -58,7 +58,7 @@ export default function Home() {
           .from('billboards')
           .select('*')
           .eq('is_active', true)
-          .order('display_order', { ascending: true });
+          .order('created_at', { ascending: true });
         
         if (error) throw error;
         setBillboards(data || []);
@@ -279,7 +279,7 @@ export default function Home() {
           Billboard images as full-screen background.
           Navbar sits on top (sticky, transparent).
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      {false && (
+      {/* {false && ( */}
         <section className="relative h-[92vh] min-h-[600px] max-h-[960px] overflow-hidden -mt-[104px]">
 
           {/* Background — billboard images */}
@@ -383,7 +383,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-      )}
+      {/* )} */}
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           SECTION 2 — DESTINATION INSPIRATION STRIP

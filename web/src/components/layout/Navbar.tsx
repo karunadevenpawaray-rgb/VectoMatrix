@@ -33,7 +33,8 @@ export default function Navbar() {
   }, []);
 
   const isHome = pathname === "/";
-  const isTransparent = false; // Disabled transparent mode since hero banner is removed
+  // const isTransparent = false; // Disabled transparent mode since hero banner is removed
+  const isTransparent = isHome && !scrolled;
 
   const navLinks = [
     { href: "/", label: "Holiday Packages" },
