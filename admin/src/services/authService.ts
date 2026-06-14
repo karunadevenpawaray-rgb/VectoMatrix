@@ -20,5 +20,17 @@ export const authService = {
   async getCurrentUser(): Promise<any> {
     const { data: { user } } = await supabase.auth.getUser();
     return user;
+  },
+
+  async getCurrentAgencyId(): Promise<string | null> {
+    const user = await this.getCurrentUser();
+    if (!user) return null;
+    const { data, error } = await supabase
+      .from('agencies')
+      .select('id')
+      .eq('auth_id', user.id)
+      .single();
+    if (error || !data) return null;
+    return data.id;
   }
 };

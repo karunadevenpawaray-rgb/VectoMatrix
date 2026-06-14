@@ -34,7 +34,7 @@ export const leadService = {
     if (newStatus === 'CONVERTED') {
       try {
         const leadRes = await supabase.from('leads').select('*, package:packages(title)').eq('id', leadId).single();
-        if (leadRes.data) {
+          /* Original code:
           await fetch('/api/email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -49,7 +49,28 @@ export const leadService = {
               }
             })
           });
-        }
+          */
+          if (leadRes.data) {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token || '';
+            await fetch('/api/email', {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                agencyId: leadRes.data.assigned_agency_id,
+                type: 'LEAD_CONVERTED',
+                toEmail: leadRes.data.client_email,
+                variables: {
+                  client_name: leadRes.data.client_name,
+                  package_title: leadRes.data.package.title,
+                  total_amount: leadRes.data.calculated_total_mur
+                }
+              })
+            });
+          }
       } catch (err) {
         console.error("Failed to trigger conversion email:", err);
       }

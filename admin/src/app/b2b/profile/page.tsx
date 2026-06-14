@@ -1,15 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { authService } from "@/services/authService";
 
 export default function AgencyProfilePage() {
   const [loading, setLoading] = useState(false);
+  const [agencyId, setAgencyId] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [agencyName, setAgencyName] = useState("Shammi Tours Ltd");
-  const [email, setEmail] = useState("info@shammitours.mu");
-  const [phone, setPhone] = useState("+23055551122");
-  const [bio, setBio] = useState("Specializing in premium desert safaris and customized UAE itineraries for Mauritian travelers.");
+  const [agencyName, setAgencyName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
 
+  useEffect(() => {
+    const loadProfile = async () => {
+      setLoading(true);
+      try {
+        const id = await authService.getCurrentAgencyId();
+        if (id) {
+          setAgencyId(id);
+          const { supabase } = await import('@/utils/supabase');
+          const { data, error } = await supabase
+            .from('agencies')
+            .select('*')
+            .eq('id', id)
+            .single();
+          if (!error && data) {
+            setAgencyName(data.name || "");
+            setEmail(data.email || "");
+            setPhone(data.phone || "");
+            setBio(data.bio || "");
+            setLogoUrl(data.logo_url || null);
+          }
+        }
+      } catch (e) {
+        console.error("Error loading agency profile:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, []);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -30,6 +61,10 @@ export default function AgencyProfilePage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agencyId) {
+      alert("No active session found.");
+      return;
+    }
     setLoading(true);
 
     // --- PREPARED SUPABASE UPDATE ---
@@ -40,7 +75,7 @@ export default function AgencyProfilePage() {
       phone: phone,
       bio: bio,
       logo_url: logoUrl
-    }).eq('id', 'CURRENT_USER_AGENCY_ID');
+    }).eq('id', agencyId);
     if (error) alert(error.message);
     else alert("Profile Saved!");
     setLoading(false);

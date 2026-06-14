@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../utils/supabase';
 
 export default function BookingFlowScreen({ route, navigation }: any) {
-  const { packageId } = route.params || { packageId: 'pkg-1' };
+  const { packageId, agencyId } = route.params || { packageId: 'pkg-1', agencyId: 'agency-alpha' };
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -39,37 +39,59 @@ export default function BookingFlowScreen({ route, navigation }: any) {
   };
 
   const handleCheckout = async () => {
+    if (!name || !email || !phone) {
+      Alert.alert("Validation Error", "Please fill in all contact details.");
+      return;
+    }
     setProcessing(true);
+
+    const leadPayload = {
+      packageId,
+      agencyId: agencyId || 'agency-alpha',
+      name,
+      email,
+      phone,
+      totalAmount: pricing.finalTotal
+    };
+
     try {
       const { data: lead, error } = await supabase.from('leads').insert({
-        package_id: packageId,
-        assigned_agency_id: 'agency-alpha', // Hardcoded fallback
-        client_name: name,
-        client_email: email,
-        client_phone: phone,
-        calculated_total_mur: pricing.finalTotal,
+        package_id: leadPayload.packageId,
+        assigned_agency_id: leadPayload.agencyId,
+        client_name: leadPayload.name,
+        client_email: leadPayload.email,
+        client_phone: leadPayload.phone,
+        calculated_total_mur: leadPayload.totalAmount,
         status: "PENDING",
         payment_status: "PAID"
       }).select().single();
       
       if (error) throw error;
 
-      if (!lead) {
+      // Create an in-app Push Notification
+      await createPushNotification("Booking Confirmed! 🎉", "Your payment was successful and your itinerary is ready.");
+      Alert.alert("Success", "Booking confirmed and synced!", [
+        { text: "View Dashboard", onPress: () => navigation.navigate('CustomerDashboard') }
+      ]);
+    } catch (e: any) {
+      console.warn("Online checkout failed, attempting offline queueing:", e);
+      try {
+        // Save to offline queue
+        const queueRaw = await AsyncStorage.getItem('vmx_offline_queue');
+        const queue = queueRaw ? JSON.parse(queueRaw) : [];
+        queue.push(leadPayload);
+        await AsyncStorage.setItem('vmx_offline_queue', JSON.stringify(queue));
+
         setIsOfflineSync(true);
+        await createPushNotification("Offline Booking Saved 🛜", "We will sync your booking to the server once you are online.");
         Alert.alert(
           "You are Offline", 
           "Your booking has been saved locally and will sync automatically when you reconnect.",
           [{ text: "OK", onPress: () => navigation.navigate('CustomerDashboard') }]
         );
-      } else {
-        // Create an in-app Push Notification
-        await createPushNotification("Booking Confirmed! 🎉", "Your payment was successful and your itinerary is ready.");
-        Alert.alert("Success", "Booking confirmed and synced!", [
-          { text: "View Dashboard", onPress: () => navigation.navigate('CustomerDashboard') }
-        ]);
+      } catch (storageError) {
+        Alert.alert("Error", "Could not complete booking or save offline.");
       }
-    } catch (e: any) {
-      Alert.alert("Error", e.message);
     } finally {
       setProcessing(false);
     }

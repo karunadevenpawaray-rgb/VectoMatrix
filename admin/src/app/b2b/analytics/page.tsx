@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { analyticsService } from "@/services/analyticsService";
+import { authService } from "@/services/authService";
 
 export default function AnalyticsPage() {
   const [metrics, setMetrics] = useState<any>(null);
@@ -14,8 +15,17 @@ export default function AnalyticsPage() {
   const fetchMetrics = async () => {
     setLoading(true);
     try {
+      const id = await authService.getCurrentAgencyId();
+      if (!id) {
+        setMetrics(null);
+        setLoading(false);
+        return;
+      }
       // Use the Alpha Travels UUID from seed.sql instead of invalid "CURRENT_USER_AGENCY_ID"
+      /* Original code:
       const data = await analyticsService.getAgencyMetrics('11111111-1111-1111-1111-111111111111');
+      */
+      const data = await analyticsService.getAgencyMetrics(id);
       if (data) {
         setMetrics({
           totalRevenue: data.revenueGenerated || 0,

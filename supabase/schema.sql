@@ -94,6 +94,8 @@ CREATE TABLE public.billboards (
   title VARCHAR(255),
   subtitle VARCHAR(255),
   link_url TEXT,
+  cta_text VARCHAR(100) DEFAULT 'Book Now',
+  cta_link VARCHAR(255) DEFAULT '/',
   is_active BOOLEAN DEFAULT true,
   display_order INT DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
@@ -232,6 +234,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+/* Redundant declaration commented out for safety:
 -- BILLBOARDS (Promotional Slider)
 CREATE TABLE public.billboards (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -243,6 +246,7 @@ CREATE TABLE public.billboards (
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
+*/
 
 ALTER TABLE public.billboards ENABLE ROW LEVEL SECURITY;
 

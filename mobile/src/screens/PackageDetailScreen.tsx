@@ -144,7 +144,7 @@ export default function PackageDetailScreen({ route, navigation }: any) {
 
         <TouchableOpacity 
           style={styles.bookButton}
-          onPress={() => navigation.navigate('BookingFlow', { packageId: pkg.id, totalAmount: pkg.base_price_mur })}
+          onPress={() => navigation.navigate('BookingFlow', { packageId: pkg.id, totalAmount: pkg.base_price_mur, agencyId: pkg.agency_id })}
         >
           <Text style={styles.bookButtonText}>Book Now</Text>
         </TouchableOpacity>

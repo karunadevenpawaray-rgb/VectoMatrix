@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { inventoryService, PackagePayload } from "@/services/inventoryService";
 import { storageService } from "@/services/storageService";
+import { authService } from "@/services/authService";
 
 export default function InventoryPage() {
   const [packages, setPackages] = useState<any[]>([]);
@@ -31,16 +32,31 @@ export default function InventoryPage() {
   // Storage Integration
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [agencyId, setAgencyId] = useState<string | null>(null);
 
   useEffect(() => {
     setTenant(null);
-    fetchInventory();
+    const initialize = async () => {
+      let currentId = null;
+      try {
+        const id = await authService.getCurrentAgencyId();
+        if (id) {
+          setAgencyId(id);
+          currentId = id;
+        }
+      } catch (e) {
+        console.error("Failed to load agency:", e);
+      }
+      fetchInventory(currentId);
+    };
+    initialize();
   }, []);
 
-  const fetchInventory = async () => {
+  const fetchInventory = async (currentId?: string | null) => {
     setLoading(true);
     try {
-      const data = await inventoryService.getPackages();
+      const activeId = currentId !== undefined ? currentId : agencyId;
+      const data = await inventoryService.getPackages(activeId);
       setPackages(data);
     } catch (error) {
       alert("Error fetching inventory");
@@ -97,7 +113,8 @@ export default function InventoryPage() {
       is_active: isActive,
       flight_included: flightIncluded,
       meal_plan: mealPlan,
-      is_featured: isFeatured
+      is_featured: isFeatured,
+      agency_id: agencyId || undefined
     };
 
     try {
@@ -105,11 +122,15 @@ export default function InventoryPage() {
         await inventoryService.updatePackage(editingPkgId, payload);
         alert("Package updated successfully!");
       } else {
+        if (!agencyId) {
+          alert("No active agency session found. Cannot create package.");
+          return;
+        }
         await inventoryService.createPackage(payload);
         alert("Package created successfully!");
       }
       resetForm();
-      fetchInventory();
+      fetchInventory(agencyId);
     } catch (error: any) {
       alert(error.message || "Failed to save package");
     }

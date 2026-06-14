@@ -19,17 +19,18 @@ export interface PackagePayload {
 }
 
 export const inventoryService = {
-  async getPackages() {
-
-    const { data: supaData, error } = await supabase.from('packages').select('*').eq('is_archived', false).order('created_at', { ascending: false });
+  async getPackages(agencyId?: string | null) {
+    let query = supabase.from('packages').select('*').eq('is_archived', false);
+    if (agencyId) {
+      query = query.eq('agency_id', agencyId);
+    }
+    const { data: supaData, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
     return supaData || [];
   },
 
   async createPackage(payload: PackagePayload) {
-
-    const insertPayload = { ...payload, agency_id: payload.agency_id || 'CURRENT_USER_AGENCY_ID' };
-    const { data, error } = await supabase.from('packages').insert(insertPayload).select().single();
+    const { data, error } = await supabase.from('packages').insert(payload).select().single();
     if (error) throw error;
     return data;
   },

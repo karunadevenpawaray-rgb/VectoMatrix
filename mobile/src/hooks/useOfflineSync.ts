@@ -38,7 +38,7 @@ export function useOfflineSync() {
       for (const item of queue) {
         await supabase.from('leads').insert({
           package_id: item.packageId,
-          assigned_agency_id: 'agency-alpha', 
+          assigned_agency_id: item.agencyId || 'agency-alpha', 
           client_name: item.name,
           client_email: item.email,
           client_phone: item.phone,

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { authService } from "@/services/authService";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"addons" | "communications">("addons");
+  const [agencyId, setAgencyId] = useState<string | null>(null);
 
   // Addon Architecture State
   const [addons, setAddons] = useState({
@@ -18,12 +20,12 @@ export default function SettingsPage() {
 
   // SMTP & Template State
   const [smtp, setSmtp] = useState({
-    host: "smtp.example.com",
+    host: "",
     port: "587",
-    user: "agency@example.com",
-    pass: "********",
-    fromEmail: "agency@example.com",
-    fromName: "Shammi Tours"
+    user: "",
+    pass: "",
+    fromEmail: "",
+    fromName: ""
   });
 
   const [templates, setTemplates] = useState({
@@ -31,21 +33,57 @@ export default function SettingsPage() {
     leadConverted: "<h1>Booking Confirmed</h1>\n<p>Dear {{client_name}}, your booking for {{package_title}} is confirmed.</p>"
   });
 
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const id = await authService.getCurrentAgencyId();
+        if (id) {
+          setAgencyId(id);
+          const { supabase } = await import('@/utils/supabase');
+          const { data, error } = await supabase
+            .from('agency_settings')
+            .select('*')
+            .eq('agency_id', id)
+            .single();
+          
+          if (!error && data) {
+            setSmtp({
+              host: data.smtp_host || "",
+              port: String(data.smtp_port || "587"),
+              user: data.smtp_user || "",
+              pass: data.smtp_pass || "",
+              fromEmail: data.smtp_from_email || "",
+              fromName: data.smtp_from_name || ""
+            });
+            setTemplates({
+              leadReceived: data.template_lead_received || "",
+              leadConverted: data.template_lead_converted || ""
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Error loading SMTP settings:", e);
+      }
+    };
+    loadSettings();
+  }, []);
+
   const toggleAddon = (key: keyof typeof addons) => {
     setAddons(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-
-
   const handleSaveAddons = async () => {
-    // Live update to agencies table
+    alert("Addon configuration saved locally.");
   };
 
   const handleSaveCommunications = async () => {
-    // Live update to agency_settings table
+    if (!agencyId) {
+      alert("No active session found.");
+      return;
+    }
     const { supabase } = await import('@/utils/supabase');
     const { error } = await supabase.from('agency_settings').upsert({
-      agency_id: 'CURRENT_USER_AGENCY_ID',
+      agency_id: agencyId,
       smtp_host: smtp.host,
       smtp_port: parseInt(smtp.port),
       smtp_user: smtp.user,
@@ -55,6 +93,8 @@ export default function SettingsPage() {
       template_lead_received: templates.leadReceived,
       template_lead_converted: templates.leadConverted
     });
+    if (error) alert(error.message);
+    else alert("Communications saved successfully!");
   };
 
   return (
