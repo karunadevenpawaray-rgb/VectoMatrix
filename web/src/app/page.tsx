@@ -2,14 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Database } from "@/types/supabase";
+import { supabase } from "@/utils/supabase";
 import { useCompare } from "@/context/CompareContext";
 import { packageService } from "@/services/packageService";
 import { useRouter } from "next/navigation";
-import {
-  Search, Loader2, Map, LayoutGrid, List, Filter,
-  Plane, Hotel, Coffee, CarFront, ChevronLeft, ChevronRight, ChevronDown,
-} from "lucide-react";
-import { mockEngine, saasConfigManager } from "@vectormatrix/mock-engine";
+import { Search, Loader2, Map, LayoutGrid, List, Filter, Plane, Hotel, Coffee, CarFront, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 
 type Package = Database["public"]["Tables"]["packages"]["Row"] & {
   agency: Database["public"]["Tables"]["agencies"]["Row"];
@@ -57,10 +54,16 @@ export default function Home() {
   useEffect(() => {
     const fetchBillboards = async () => {
       try {
-        const list = await (mockEngine as any).getBillboards();
-        setBillboards(list || []);
+        const { data, error } = await supabase
+          .from('billboards')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+        
+        if (error) throw error;
+        setBillboards(data || []);
       } catch (e) {
-        console.error(e);
+        console.error("Failed to fetch billboards:", e);
       }
     };
     fetchBillboards();
@@ -69,8 +72,11 @@ export default function Home() {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const list = await mockEngine.getPackages();
-        setFeaturedPackages(list || []);
+        const res = await packageService.getFilteredPackages({ 
+          searchQuery: '', filterDestination: '', filterMonth: '', filterStars: '', priceRange: 1000000, sortBy: 'recommended' 
+        }, 1, 10);
+        // Only keep featured packages
+        setFeaturedPackages(res.paginatedData.filter((p: any) => p.is_featured));
       } catch (e) {
         console.error(e);
       }
@@ -80,7 +86,25 @@ export default function Home() {
 
   // Load SaaS Active Tenant dynamically & handle window responsive widths
   useEffect(() => {
-    setTenant(saasConfigManager.getActiveTenant());
+    const fetchTenant = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('tenant_config')
+          .select('*')
+          .eq('is_active', true)
+          .limit(1)
+          .single();
+        
+        if (!error && data) {
+          setTenant({ name: data.tenant_name, theme: "orange", logo: data.logo_url });
+        } else {
+          setTenant({ name: "VectoMatrix Travel & Tours", theme: "orange" });
+        }
+      } catch (e) {
+        setTenant({ name: "VectoMatrix Travel & Tours", theme: "orange" });
+      }
+    };
+    fetchTenant();
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setVisibleCount(1);

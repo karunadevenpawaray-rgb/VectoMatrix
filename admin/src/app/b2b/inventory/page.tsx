@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { inventoryService, PackagePayload } from "@/services/inventoryService";
 import { storageService } from "@/services/storageService";
-import { saasConfigManager } from "@vectormatrix/mock-engine";
 
 export default function InventoryPage() {
   const [packages, setPackages] = useState<any[]>([]);
@@ -34,8 +33,7 @@ export default function InventoryPage() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    saasConfigManager.loadDynamicPlugins();
-    setTenant(saasConfigManager.getActiveTenant());
+    setTenant(null);
     fetchInventory();
   }, []);
 

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { checkoutService } from "@/services/checkoutService";
-import { mockEngine } from "@vectormatrix/mock-engine";
+import { packageService } from "@/services/packageService";
 
 /* Legacy declaration commented out for safety:
 export default function CheckoutPage() {
@@ -42,7 +42,7 @@ function CheckoutContent() {
 
   const loadPackage = async (id: string) => {
     try {
-      const data = await mockEngine.getPackageById(id);
+      const data = await packageService.getPackageById(id);
       if (data) {
         setPkg(data);
         if (data.service_type === 'hotel' && data.meal_plans) {
@@ -59,9 +59,15 @@ function CheckoutContent() {
 
   useEffect(() => {
     if (pkg) {
-      mockEngine.calculatePrice(pkg.id, {
-        adults, teens, children, infants, mealPlan
-      }).then(res => setPricing(res)).catch(console.error);
+      const basePrice = pkg.base_price_mur || 0;
+      const calculatedBase = basePrice * (adults * 1 + teens * 0.75 + children * 0.5);
+      const serviceFee = calculatedBase * 0.05; // 5% mockup
+      setPricing({
+        baseTotal: calculatedBase,
+        serviceFeeAmount: serviceFee,
+        markupPercent: 5,
+        finalTotal: calculatedBase + serviceFee
+      });
     }
   }, [pkg, adults, teens, children, infants, mealPlan]);
 

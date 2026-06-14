@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { mobileLeadService } from '../services/mobileLeadService';
-import { MockEngine } from '@vectormatrix/mock-engine';
-
-const engine = new MockEngine(AsyncStorage as any);
+import { supabase } from '../utils/supabase';
 
 export function useOfflineSync() {
   const [queueCount, setQueueCount] = useState(0);
@@ -38,7 +36,7 @@ export function useOfflineSync() {
       const queue = queueRaw ? JSON.parse(queueRaw) : [];
       
       for (const item of queue) {
-        await engine.createLead({
+        await supabase.from('leads').insert({
           package_id: item.packageId,
           assigned_agency_id: 'agency-alpha', 
           client_name: item.name,

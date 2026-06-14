@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { mockEngine } from "@vectormatrix/mock-engine";
-
+import { packageService } from "@/services/packageService";
 const getMockWeather = (destination: string) => {
   const dest = (destination || "").toLowerCase();
   if (dest.includes("cape") || dest.includes("south")) {
@@ -47,7 +46,7 @@ export default function PackageDetail() {
 
   const loadPackage = async (id: string) => {
     try {
-      const data = await mockEngine.getPackageById(id);
+      const data = await packageService.getPackageById(id);
       if (data) {
         setPkg(data);
         setWeather(getMockWeather(data.destination || data.title));

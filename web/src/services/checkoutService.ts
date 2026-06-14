@@ -1,9 +1,5 @@
 // import { supabase } from "@/lib/supabaseClient";
 import { supabase } from "@/utils/supabase";
-import { mockEngine } from "@vectormatrix/mock-engine";
-
-// This file encapsulates the checkout logic, including Mock delays and Live Supabase insertions.
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
 
 export interface CheckoutDetails {
   packageId: string;
@@ -16,9 +12,9 @@ export interface CheckoutDetails {
 
 export const checkoutService = {
   async processCheckout(details: CheckoutDetails): Promise<{ success: boolean; error?: string }> {
-    if (USE_MOCK_DATA) {
-      // Simulate payment processing and backend insertion
-      await mockEngine.createLead({
+    // --- LIVE SUPABASE INSERT ---
+    try {
+      const { error } = await supabase.from('leads').insert({
         package_id: details.packageId,
         assigned_agency_id: details.agencyId,
         client_name: details.clientName,
@@ -26,26 +22,10 @@ export const checkoutService = {
         client_phone: details.clientPhone,
         calculated_total_mur: details.totalAmount,
         status: "PENDING",
-        payment_status: "PAID" // Mock auto-paid
+        payment_status: "UNPAID"
       });
-      return { success: true };
-    }
 
-    // --- LIVE STRIPE INSERT & CHECKOUT ---
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(details)
-      });
-      const data = await response.json();
-
-      if (data.error) throw new Error(data.error);
-
-      // Redirect to Stripe Checkout Session URL
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      if (error) throw error;
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };

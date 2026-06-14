@@ -1,4 +1,4 @@
-const USE_MOCK_DATA = process.env.EXPO_PUBLIC_USE_MOCK_ENGINE === 'true';
+import { supabase } from '../utils/supabase';
 
 const MOCK_PACKAGES = [
   { id: '1', title: '5 Days Dubai Premium Desert Safari', destination: 'DUBAI', price: 'Rs 45,000', priceValue: 45000, duration: '5 Days', stars: 5, agency: 'Shammi Tours', image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80' },
@@ -17,29 +17,21 @@ export const mobilePackageService = {
   async getPackages(filters: MobilePackageFilters) {
     let data = [];
     
-    if (USE_MOCK_DATA) {
-      // Simulate network request
-      await new Promise(r => setTimeout(r, 600));
-      data = [...MOCK_PACKAGES];
-    } else {
-      // --- PREPARED SUPABASE FETCH ---
-      /*
-      const { data: supaData, error } = await supabase.from('packages').select('*, agency:agencies(name)').eq('is_active', true);
-      if (!error && supaData) {
-        // Map supaData to the format expected by the Mobile UI
-        data = supaData.map(pkg => ({
-          id: pkg.id,
-          title: pkg.title,
-          destination: pkg.destination,
-          price: `Rs ${pkg.base_price_mur.toLocaleString()}`,
-          priceValue: pkg.base_price_mur,
-          duration: 'TBD',
-          stars: pkg.hotel_stars || 4,
-          agency: pkg.agency?.name || 'Unknown',
-          image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80'
-        }));
-      }
-      */
+    // --- PREPARED SUPABASE FETCH ---
+    const { data: supaData, error } = await supabase.from('packages').select('*, agency:agencies(name)').eq('is_active', true);
+    if (!error && supaData) {
+      // Map supaData to the format expected by the Mobile UI
+      data = supaData.map((pkg: any) => ({
+        id: pkg.id,
+        title: pkg.title,
+        destination: pkg.destination,
+        price: `Rs ${pkg.base_price_mur.toLocaleString()}`,
+        priceValue: pkg.base_price_mur,
+        duration: 'TBD',
+        stars: pkg.hotel_stars || 4,
+        agency: pkg.agency?.name || 'Unknown',
+        image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80'
+      }));
     }
 
     // Filter Logic

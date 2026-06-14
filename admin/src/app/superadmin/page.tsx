@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { saasConfigManager, TenantConfig } from "@vectormatrix/mock-engine";
+export interface TenantConfig {
+  id: string;
+  name: string;
+  subdomain: string;
+  primaryColor: string;
+  plugins: {
+    stripeCheckout: boolean;
+    promotionalBillboards: boolean;
+    packageComparison: boolean;
+    multipleImages: boolean;
+  };
+}
 import { Shield, Power } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { useSuperAdminMetrics } from "@/hooks/useSuperAdminMetrics";
@@ -13,24 +24,16 @@ export default function SuperAdminPage() {
   const [activeTenant, setActiveTenantState] = useState<TenantConfig | null>(null);
 
   useEffect(() => {
-    saasConfigManager.loadDynamicPlugins();
-    setTenants([...saasConfigManager.getTenants()]);
-    setActiveTenantState(saasConfigManager.getActiveTenant());
+    setTenants([]);
+    setActiveTenantState(null);
   }, []);
 
   const handleTenantSelect = (id: string) => {
-    saasConfigManager.setActiveTenant(id);
-    setActiveTenantState(saasConfigManager.getActiveTenant());
+    // Live Supabase implementation goes here
   };
 
   const handleTogglePlugin = (pluginKey: keyof TenantConfig["plugins"]) => {
-    if (!activeTenant) return;
-    const nextVal = !activeTenant.plugins[pluginKey];
-    saasConfigManager.updateTenantPlugins(activeTenant.id, { [pluginKey]: nextVal });
-    
-    saasConfigManager.loadDynamicPlugins();
-    setTenants([...saasConfigManager.getTenants()]);
-    setActiveTenantState(saasConfigManager.getActiveTenant());
+    // Live Supabase implementation goes here
   };
 
   return (

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { mockEngine } from "@vectormatrix/mock-engine";
+import { supabase } from "@/utils/supabase";
 
 export default function AgencyOnboarding() {
   const [step, setStep] = useState(1);
@@ -19,12 +19,13 @@ export default function AgencyOnboarding() {
     setLoading(true);
 
     try {
-      await mockEngine.createAgency({
+      const { error } = await supabase.from('agencies').insert({
         name: agencyName,
-        brn,
-        email,
-        phone
+        email: email,
+        phone: phone,
+        status: 'PENDING_VERIFICATION'
       });
+      if (error) throw error;
       setStep(3); // Go to success step
     } catch (error) {
       alert("Failed to register agency.");

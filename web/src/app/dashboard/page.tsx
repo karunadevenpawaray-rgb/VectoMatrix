@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { mockEngine } from "@vectormatrix/mock-engine";
 import { Building2, FileText, Compass, CheckCircle, Clock } from "lucide-react";
 
 export default function CustomerDashboard() {
@@ -18,9 +17,6 @@ export default function CustomerDashboard() {
 
   const fetchDashboardData = async () => {
     setLoading(true);
-    const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true);
-    
-    // Default fallback email
     let email = "jean@example.com";
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
@@ -28,19 +24,8 @@ export default function CustomerDashboard() {
       localStorage.setItem("vmx_customer_email", email);
     }
 
-    if (USE_MOCK_DATA) {
-      const allLeads = await mockEngine.getLeads();
-      const pending = allLeads.filter(l => l.status === 'PENDING');
-      const converted = allLeads.filter(l => l.status === 'CONVERTED' || l.status === 'CANCELLED');
-      setInquiries(pending);
-      setBookings(converted);
-      const first = allLeads[0];
-      if (first?.client_name) {
-        setClientName(first.client_name.split(" ")[0].toUpperCase());
-      }
-    } else {
-      // Live Supabase Fetch
-      const { supabase } = await import("@/utils/supabase");
+    // Live Supabase Fetch
+    const { supabase } = await import("@/utils/supabase");
       const { data, error } = await supabase
         .from('leads')
         .select('*, package:packages(*)')
@@ -55,7 +40,7 @@ export default function CustomerDashboard() {
           setClientName(first.client_name.split(" ")[0].toUpperCase());
         }
       }
-    }
+    // }
     setLoading(false);
   };
 
@@ -69,13 +54,8 @@ export default function CustomerDashboard() {
 
   const handleCancelBooking = async (id: string) => {
     if (confirm("Are you sure you want to cancel this booking?")) {
-      const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true);
-      if (USE_MOCK_DATA) {
-        await mockEngine.updateLeadStatus(id, "CANCELLED");
-      } else {
-        const { supabase } = await import("@/utils/supabase");
-        await supabase.from('leads').update({ status: 'CANCELLED' }).eq('id', id);
-      }
+      const { supabase } = await import("@/utils/supabase");
+      await supabase.from('leads').update({ status: 'CANCELLED' }).eq('id', id);
       alert("Booking cancelled successfully.");
       fetchDashboardData();
     }

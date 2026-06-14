@@ -10,22 +10,13 @@ export default function AgencyProfilePage() {
   const [phone, setPhone] = useState("+23055551122");
   const [bio, setBio] = useState("Specializing in premium desert safaris and customized UAE itineraries for Mauritian travelers.");
 
-  const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (USE_MOCK_DATA) {
-      // Mock File Upload (Blob URL)
-      const mockUrl = URL.createObjectURL(file);
-      setLogoUrl(mockUrl);
-      alert("Mock: Logo uploaded successfully.");
-      return;
-    }
-
     // --- PREPARED SUPABASE STORAGE UPLOAD ---
-    /*
+    const { supabase } = await import('@/utils/supabase');
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `agency-logos/${fileName}`;
@@ -35,23 +26,14 @@ export default function AgencyProfilePage() {
       const { data } = supabase.storage.from('package-images').getPublicUrl(filePath);
       setLogoUrl(data.publicUrl);
     }
-    */
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    if (USE_MOCK_DATA) {
-      setTimeout(() => {
-        setLoading(false);
-        alert("Mock: Profile successfully updated.");
-      }, 800);
-      return;
-    }
-
     // --- PREPARED SUPABASE UPDATE ---
-    /*
+    const { supabase } = await import('@/utils/supabase');
     const { error } = await supabase.from('agencies').update({
       name: agencyName,
       email: email,
@@ -62,7 +44,6 @@ export default function AgencyProfilePage() {
     if (error) alert(error.message);
     else alert("Profile Saved!");
     setLoading(false);
-    */
   };
 
   return (

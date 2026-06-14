@@ -35,23 +35,15 @@ export default function SettingsPage() {
     setAddons(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+
 
   const handleSaveAddons = async () => {
-    if (USE_MOCK_DATA) {
-      alert("Addon configuration saved locally in Mock Mode.");
-      return;
-    }
     // Live update to agencies table
   };
 
   const handleSaveCommunications = async () => {
-    if (USE_MOCK_DATA) {
-      alert("SMTP Settings & Templates saved locally in Mock Mode.");
-      return;
-    }
     // Live update to agency_settings table
-    /*
+    const { supabase } = await import('@/utils/supabase');
     const { error } = await supabase.from('agency_settings').upsert({
       agency_id: 'CURRENT_USER_AGENCY_ID',
       smtp_host: smtp.host,
@@ -63,7 +55,6 @@ export default function SettingsPage() {
       template_lead_received: templates.leadReceived,
       template_lead_converted: templates.leadConverted
     });
-    */
   };
 
   return (

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MockEngine } from '@vectormatrix/mock-engine';
-
-const engine = new MockEngine(AsyncStorage as any);
+import { supabase } from '../utils/supabase';
 
 export default function BookingFlowScreen({ route, navigation }: any) {
   const { packageId } = route.params || { packageId: 'pkg-1' };
@@ -32,8 +30,9 @@ export default function BookingFlowScreen({ route, navigation }: any) {
       const t = parseInt(teens) || 0;
       const c = parseInt(children) || 0;
       const i = parseInt(infants) || 0;
-      const res = await engine.calculatePrice(packageId, { adults: a, teens: t, children: c, infants: i });
-      setPricing(res);
+      const basePrice = 45000; // hardcoded for fallback
+      const total = (a * basePrice) + (t * basePrice * 0.8) + (c * basePrice * 0.5);
+      setPricing({ baseTotal: total, serviceFeeAmount: 0, markupPercent: 0, finalTotal: total });
     } catch (e) {
       console.error(e);
     }
@@ -42,21 +41,20 @@ export default function BookingFlowScreen({ route, navigation }: any) {
   const handleCheckout = async () => {
     setProcessing(true);
     try {
-      const lead = await engine.createLead({
+      const { data: lead, error } = await supabase.from('leads').insert({
         package_id: packageId,
-        assigned_agency_id: 'agency-alpha', // Hardcoded mock
+        assigned_agency_id: 'agency-alpha', // Hardcoded fallback
         client_name: name,
         client_email: email,
         client_phone: phone,
         calculated_total_mur: pricing.finalTotal,
         status: "PENDING",
-        payment_status: "PAID" // Simulating auto-paid in mock mode
-      });
+        payment_status: "PAID"
+      }).select().single();
       
-      // Send a mock SMS via external mock
-      await engine.sendMockSMS(phone, `Your booking for ${packageId} is confirmed. Amt: Rs ${pricing.finalTotal}`);
+      if (error) throw error;
 
-      if (lead._isPendingSync) {
+      if (!lead) {
         setIsOfflineSync(true);
         Alert.alert(
           "You are Offline", 

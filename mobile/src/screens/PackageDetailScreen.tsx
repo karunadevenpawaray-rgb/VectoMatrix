@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MockEngine } from '@vectormatrix/mock-engine';
-
-const engine = new MockEngine(AsyncStorage as any);
+import { supabase } from '../utils/supabase';
 
 export default function PackageDetailScreen({ route, navigation }: any) {
   const { packageId } = route.params || { packageId: 'pkg-1' };
@@ -20,12 +18,11 @@ export default function PackageDetailScreen({ route, navigation }: any) {
 
   const loadPackage = async () => {
     try {
-      const data = await engine.getPackageById(packageId);
+      const { data } = await supabase.from('packages').select().eq('id', packageId).single();
       setPkg(data);
       if (data) {
         setConvertedPrice(data.base_price_mur);
-        const w = await engine.getMockWeather(data.destination);
-        setWeather(w);
+        setWeather({ temp: 30, condition: "Sunny" });
       }
     } catch (e) {
       console.error(e);
@@ -38,8 +35,10 @@ export default function PackageDetailScreen({ route, navigation }: any) {
     const nextCur = currency === 'MUR' ? 'USD' : currency === 'USD' ? 'EUR' : 'MUR';
     setCurrency(nextCur);
     if (pkg) {
-      const newPrice = await engine.convertCurrency(pkg.base_price_mur, 'MUR', nextCur);
-      setConvertedPrice(newPrice);
+      let rate = 1;
+      if (nextCur === 'USD') rate = 0.022;
+      else if (nextCur === 'EUR') rate = 0.020;
+      setConvertedPrice(pkg.base_price_mur * rate);
     }
   };
 

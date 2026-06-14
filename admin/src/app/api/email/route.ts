@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { supabase } from '@/utils/supabase';
 
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
 
 export async function POST(request: Request) {
   try {
@@ -10,15 +9,6 @@ export async function POST(request: Request) {
 
     if (!agencyId || !type || !toEmail) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    if (USE_MOCK_DATA) {
-      console.log(`\n[MOCK EMAIL SERVER]`);
-      console.log(`Intercepted outgoing email for agency: ${agencyId}`);
-      console.log(`Type: ${type} | To: ${toEmail}`);
-      console.log(`Variables:`, variables);
-      console.log(`(Email was not actually sent. Set USE_MOCK_DATA = false to use real SMTP.)\n`);
-      return NextResponse.json({ success: true, mock: true });
     }
 
     // --- LIVE SMTP DELIVERY ---

@@ -3,9 +3,6 @@ import Stripe from 'stripe';
 // import { supabase } from '@/lib/supabaseClient';
 import { supabase } from '@/utils/supabase';
 
-// Legacy mock flag commented out for safety:
-// const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
-const USE_MOCK_DATA = (process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true)) || !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_mock';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
   apiVersion: '2026-05-27.dahlia',
@@ -15,14 +12,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { packageId, agencyId, clientName, clientEmail, clientPhone, totalAmount } = body;
-
-    if (USE_MOCK_DATA) {
-      console.log(`\n[MOCK STRIPE CHECKOUT]`);
-      console.log(`Intercepted checkout for package: ${packageId}`);
-      console.log(`Client: ${clientName} | Total: Rs ${totalAmount}`);
-      console.log(`(Checkout session was not created. Set USE_MOCK_DATA = false to use live Stripe.)\n`);
-      return NextResponse.json({ url: `/checkout?success=mock` });
-    }
 
     // --- LIVE STRIPE CHECKOUT ---
     

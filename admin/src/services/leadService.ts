@@ -1,16 +1,9 @@
 // Lead Service: Handles data access for incoming customer leads
 
 import { supabase } from '@/utils/supabase';
-import { mockEngine } from '@vectormatrix/mock-engine';
-
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
 
 export const leadService = {
   async getLeads() {
-    if (USE_MOCK_DATA) {
-      return await mockEngine.getLeads();
-    }
-
     // --- LIVE SUPABASE FETCH ---
     // RLS ensures agencies only see leads assigned to them.
     const { data: supaData, error } = await supabase
@@ -26,11 +19,6 @@ export const leadService = {
   },
 
   async updateLeadStatus(leadId: string, newStatus: string) {
-    if (USE_MOCK_DATA) {
-      await mockEngine.updateLeadStatus(leadId, newStatus);
-      return true;
-    }
-
     // --- LIVE SUPABASE UPDATE ---
     const { error } = await supabase
       .from('leads')

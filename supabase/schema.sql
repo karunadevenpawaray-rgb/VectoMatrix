@@ -87,12 +87,39 @@ CREATE TABLE public.agency_settings (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
+-- BILLBOARDS (Hero slider)
+CREATE TABLE public.billboards (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  image_url TEXT NOT NULL,
+  title VARCHAR(255),
+  subtitle VARCHAR(255),
+  link_url TEXT,
+  is_active BOOLEAN DEFAULT true,
+  display_order INT DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- TENANT CONFIG (SaaS Configuration)
+CREATE TABLE public.tenant_config (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tenant_name VARCHAR(255) NOT NULL DEFAULT 'VectoMatrix Travel & Tours',
+  primary_color VARCHAR(50) DEFAULT '#ea580c',
+  logo_url TEXT,
+  contact_email VARCHAR(255),
+  contact_phone VARCHAR(50),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
 -- 3. ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.super_admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agencies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.billboards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tenant_config ENABLE ROW LEVEL SECURITY;
 
 -- SUPER ADMINS: Only super admins can see the super admin table
 CREATE POLICY "Super admins view super admins" ON public.super_admins FOR SELECT USING (auth.uid() = auth_id);
@@ -102,6 +129,16 @@ CREATE POLICY "Agencies can view all profiles" ON public.agencies FOR SELECT USI
 CREATE POLICY "Agencies can update own profile" ON public.agencies FOR UPDATE USING (auth.uid() = auth_id OR auth.uid() IN (SELECT auth_id FROM public.super_admins));
 CREATE POLICY "Super admin can manage agencies" ON public.agencies FOR ALL USING (auth.uid() IN (SELECT auth_id FROM public.super_admins));
 
+-- AGENCY SETTINGS: Agencies read/update their own settings
+CREATE POLICY "Agencies read own settings" ON public.agency_settings FOR SELECT USING (auth.uid() = agency_id);
+CREATE POLICY "Agencies update own settings" ON public.agency_settings FOR UPDATE USING (auth.uid() = agency_id);
+CREATE POLICY "Agencies insert own settings" ON public.agency_settings FOR INSERT WITH CHECK (auth.uid() = agency_id);
+
+-- BILLBOARDS: Public read, Super Admin all
+CREATE POLICY "Public read active billboards" ON public.billboards FOR SELECT USING (is_active = true);
+
+-- TENANT CONFIG: Public read, Super Admin all
+CREATE POLICY "Public read active tenant config" ON public.tenant_config FOR SELECT USING (is_active = true);
 -- PACKAGES: Anyone can read active packages. Agencies can fully manage their own packages. (Super Admin can do all)
 CREATE POLICY "Anyone can view active packages" ON public.packages FOR SELECT USING (is_active = true AND is_archived = false);
 CREATE POLICY "Agencies can manage own packages" ON public.packages FOR ALL USING (

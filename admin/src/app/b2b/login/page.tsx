@@ -10,8 +10,6 @@ export default function VendorLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // HYBRID TOGGLE: Set to false to enforce actual Supabase Auth
-  const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,13 +39,6 @@ export default function VendorLogin() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
-          
-          {USE_MOCK_DATA && (
-            <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">
-              <p className="text-sm text-yellow-700 font-bold">Mock Mode Active</p>
-              <p className="text-xs text-yellow-600">You can click Login immediately to bypass authentication.</p>
-            </div>
-          )}
 
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
@@ -61,7 +52,7 @@ export default function VendorLogin() {
             <div>
               <label className="block text-sm font-medium text-gray-700">Password</label>
               <input
-                type="password" required={!USE_MOCK_DATA}
+                type="password" required
                 value={password} onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
               />

@@ -4,9 +4,7 @@ import { useCompare } from '../context/CompareContext';
 import { mobilePackageService } from '../services/mobilePackageService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MockEngine } from '@vectormatrix/mock-engine';
 
-const engine = new MockEngine(AsyncStorage as any);
 
 export default function HomeScreen({ onGoToCompare, navigation }: { onGoToCompare: () => void, navigation?: any }) {
   const [packages, setPackages] = useState<any[]>([]);
@@ -29,8 +27,7 @@ export default function HomeScreen({ onGoToCompare, navigation }: { onGoToCompar
   }, [filterDestination, filterMonth, filterMaxPrice]);
 
   const loadEngineConfig = async () => {
-    const config = await engine.getConfig();
-    setIsOfflineMode(config.offlineMode);
+    setIsOfflineMode(false);
   };
 
   const loadNotifications = async () => {
@@ -47,7 +44,6 @@ export default function HomeScreen({ onGoToCompare, navigation }: { onGoToCompar
   const toggleOfflineMode = async () => {
     const newMode = !isOfflineMode;
     setIsOfflineMode(newMode);
-    await engine.updateConfig({ offlineMode: newMode });
   };
 
   const fetchPackages = async () => {
