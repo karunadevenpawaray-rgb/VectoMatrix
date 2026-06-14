@@ -6,7 +6,7 @@ import { mobilePackageService } from '../services/mobilePackageService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-export default function HomeScreen({ onGoToCompare, navigation }: { onGoToCompare: () => void, navigation?: any }) {
+export default function HomeScreen({ navigation }: { navigation?: any }) {
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

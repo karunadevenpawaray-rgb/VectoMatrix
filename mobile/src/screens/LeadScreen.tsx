@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   summaryTitle: { fontSize: 12, fontWeight: 'bold', color: '#6b7280', textTransform: 'uppercase', marginBottom: 8 },
   pkgTitle: { fontSize: 16, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
   pkgAgency: { fontSize: 12, color: '#6b7280', marginBottom: 12 },
-  divider: { height: 1, backgroundColor: '#e5e7eb', my: 12 },
+  divider: { height: 1, backgroundColor: '#e5e7eb', marginVertical: 12 },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 },
   totalLabel: { fontSize: 14, color: '#374151', fontWeight: '500' },
   totalValue: { fontSize: 18, color: '#2563eb', fontWeight: 'bold' },

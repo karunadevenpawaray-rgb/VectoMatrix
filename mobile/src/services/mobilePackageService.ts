@@ -15,7 +15,7 @@ export interface MobilePackageFilters {
 
 export const mobilePackageService = {
   async getPackages(filters: MobilePackageFilters) {
-    let data = [];
+    let data: any[] = [];
     
     // --- PREPARED SUPABASE FETCH ---
     const { data: supaData, error } = await supabase.from('packages').select('*, agency:agencies(name)').eq('is_active', true);
