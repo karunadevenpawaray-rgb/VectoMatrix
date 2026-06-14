@@ -33,7 +33,7 @@ export default function Navbar() {
   }, []);
 
   const isHome = pathname === "/";
-  const isTransparent = isHome && !scrolled;
+  const isTransparent = false; // Disabled transparent mode since hero banner is removed
 
   const navLinks = [
     { href: "/", label: "Holiday Packages" },
@@ -45,6 +45,28 @@ export default function Navbar() {
 
   return (
     <>
+      {/* ===== ORANGE TOP BAR ===== */}
+      <div className="bg-[#ea580c] text-white py-1.5 px-4 md:px-8 text-[11px] md:text-xs font-bold flex justify-between items-center z-[60] relative">
+        <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <a href="tel:+23058169420" className="flex items-center gap-1.5 hover:text-orange-100 transition-colors">
+              <Phone size={12} />
+              +230 58 16 94 20
+            </a>
+            <a href="mailto:karunadevenpawaray@gmail.com" className="hidden sm:flex items-center gap-1.5 hover:text-orange-100 transition-colors">
+              <Mail size={12} />
+              karunadevenpawaray@gmail.com
+            </a>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="hidden md:block">Your Trusted Travel Partner in Mauritius</span>
+            <Link href="http://localhost:3001/b2b" className="flex items-center gap-1 hover:text-orange-100 transition-colors uppercase tracking-wider">
+              B2B Portal <LockKeyhole size={10} />
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* ===== MAIN NAVBAR ===== */}
       <nav
         className={`w-full sticky top-0 z-50 px-4 md:px-8 transition-all duration-300 ${

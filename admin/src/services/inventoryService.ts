@@ -16,6 +16,11 @@ export interface PackagePayload {
   hotel_stars?: number;
   description: string;
   gallery_images?: string[];
+  service_type?: string;
+  is_active?: boolean;
+  flight_included?: boolean;
+  meal_plan?: string;
+  is_featured?: boolean;
 }
 
 export const inventoryService = {

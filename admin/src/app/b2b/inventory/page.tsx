@@ -19,6 +19,13 @@ export default function InventoryPage() {
   const [travelMonth, setTravelMonth] = useState("");
   const [description, setDescription] = useState("• Daily Breakfast included\n• Return Airport Transfers\n• Desert Safari with BBQ Dinner");
   
+  // New Enhanced Fields
+  const [serviceType, setServiceType] = useState("package");
+  const [isActive, setIsActive] = useState(true);
+  const [flightIncluded, setFlightIncluded] = useState(true);
+  const [mealPlan, setMealPlan] = useState("Breakfast Included");
+  const [isFeatured, setIsFeatured] = useState(false);
+  
   // Tenant Configuration
   const [tenant, setTenant] = useState<any>(null);
   
@@ -48,6 +55,11 @@ export default function InventoryPage() {
     setEditingPkgId(null);
     setTitle(""); setPrice(""); setHotelName(""); setDescription("• Daily Breakfast included\n• Return Airport Transfers\n• Desert Safari with BBQ Dinner");
     setGalleryImages([]);
+    setServiceType("package");
+    setIsActive(true);
+    setFlightIncluded(true);
+    setMealPlan("Breakfast Included");
+    setIsFeatured(false);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +94,12 @@ export default function InventoryPage() {
       hotel_name: hotelName, 
       hotel_stars: parseInt(hotelStars), 
       description,
-      gallery_images: galleryImages
+      gallery_images: galleryImages,
+      service_type: serviceType,
+      is_active: isActive,
+      flight_included: flightIncluded,
+      meal_plan: mealPlan,
+      is_featured: isFeatured
     };
 
     try {
@@ -109,6 +126,11 @@ export default function InventoryPage() {
     setHotelName(pkg.hotel_name || "");
     setDescription(pkg.description || "• Daily Breakfast included\n• Return Airport Transfers\n• Desert Safari with BBQ Dinner");
     setGalleryImages(pkg.gallery_images || []);
+    setServiceType(pkg.service_type || "package");
+    setIsActive(pkg.is_active !== false);
+    setFlightIncluded(pkg.flight_included !== false);
+    setMealPlan(pkg.meal_plan || "Breakfast Included");
+    setIsFeatured(pkg.is_featured === true);
   };
 
   const handleDeleteClick = async (id: string) => {
@@ -167,6 +189,45 @@ export default function InventoryPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Base Price (MUR)</label>
                 <input required type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-2 border rounded-md" placeholder="35000" />
               </div>
+
+              {/* Status & Options */}
+              <div className="bg-slate-50 p-4 border rounded-md space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="w-full p-2 border rounded-md">
+                      <option value="package">Package</option>
+                      <option value="activity">Activity</option>
+                      <option value="hotel">Hotel</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <label className="flex items-center space-x-2 mt-2">
+                      <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="rounded" />
+                      <span className="text-sm">Active (Visible)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-2 border-gray-200">
+                  <div className="flex flex-col justify-center space-y-3">
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" checked={flightIncluded} onChange={(e) => setFlightIncluded(e.target.checked)} className="rounded text-orange-600" />
+                      <span className="text-sm font-medium text-gray-700">Flight Included</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="rounded text-orange-600" />
+                      <span className="text-sm font-medium text-gray-700">Featured Ribbon</span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Meal Plan</label>
+                    <input type="text" value={mealPlan} onChange={(e) => setMealPlan(e.target.value)} placeholder='e.g., "Half Board", "All Inclusive"' className="w-full p-2 border rounded-md" />
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Hotel Name</label>
@@ -286,9 +347,14 @@ export default function InventoryPage() {
                       </td>
                       <td className="px-6 py-4 font-medium text-gray-900">Rs {pkg.base_price_mur.toLocaleString()}</td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Active
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pkg.is_active !== false ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {pkg.is_active !== false ? 'Active' : 'Inactive'}
                         </span>
+                        {pkg.is_featured && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 ml-2 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            Featured
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right text-sm font-medium">
                         <button onClick={() => handleEditClick(pkg)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>

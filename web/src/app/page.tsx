@@ -144,12 +144,12 @@ export default function Home() {
 
   /* ─── Destination data for the inspiration strip ─── */
   const destinations = [
-    { name: "Dubai",        emoji: "🏙️", dest: "DUBAI",        img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=600" },
-    { name: "Malaysia",     emoji: "🌴", dest: "MALAYSIA",     img: "https://images.unsplash.com/photo-1596422846543-75c6ff416766?auto=format&fit=crop&q=80&w=600" },
+    { name: "Dubai", emoji: "🏙️", dest: "DUBAI", img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=600" },
+    { name: "Malaysia", emoji: "🌴", dest: "MALAYSIA", img: "https://images.unsplash.com/photo-1596422846543-75c6ff416766?auto=format&fit=crop&q=80&w=600" },
     { name: "South Africa", emoji: "🦁", dest: "SOUTH_AFRICA", img: "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&q=80&w=600" },
-    { name: "Rodrigues",    emoji: "🏝️", dest: "RODRIGUES",    img: "https://images.unsplash.com/photo-1589394815804-964ce0ff96b8?auto=format&fit=crop&q=80&w=600" },
-    { name: "Réunion",      emoji: "🌋", dest: "REUNION",      img: "https://images.unsplash.com/photo-1552554746-9d33261971dd?auto=format&fit=crop&q=80&w=600" },
-    { name: "Maldives",     emoji: "🤿", dest: "MALDIVES",     img: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=600" },
+    { name: "Rodrigues", emoji: "🏝️", dest: "RODRIGUES", img: "https://images.unsplash.com/photo-1589394815804-964ce0ff96b8?auto=format&fit=crop&q=80&w=600" },
+    { name: "Réunion", emoji: "🌋", dest: "REUNION", img: "https://images.unsplash.com/photo-1552554746-9d33261971dd?auto=format&fit=crop&q=80&w=600" },
+    { name: "Maldives", emoji: "🤿", dest: "MALDIVES", img: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=600" },
   ];
 
   /* ─── Per-destination curated image pool (multiple per destination for variety) ─── */
@@ -231,17 +231,16 @@ export default function Home() {
           Billboard images as full-screen background.
           Navbar sits on top (sticky, transparent).
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      {(!tenant || tenant.plugins.promotionalBillboards) && (
-        <section className="relative h-[92vh] min-h-[600px] max-h-[960px] overflow-hidden -mt-[72px]">
+      {false && (
+        <section className="relative h-[92vh] min-h-[600px] max-h-[960px] overflow-hidden -mt-[104px]">
 
           {/* Background — billboard images */}
           {billboards.length > 0 ? (
             billboards.map((b, idx) => (
               <div
                 key={b.id}
-                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                  idx === currentBillboardIndex ? "opacity-100" : "opacity-0"
-                }`}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentBillboardIndex ? "opacity-100" : "opacity-0"
+                  }`}
               >
                 <img
                   src={b.image_url}
@@ -305,9 +304,8 @@ export default function Home() {
                   <button
                     key={idx}
                     onClick={() => setCurrentBillboardIndex(idx)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      idx === currentBillboardIndex ? "w-8 bg-[#ea580c]" : "w-2 bg-white/40 hover:bg-white"
-                    }`}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentBillboardIndex ? "w-8 bg-[#ea580c]" : "w-2 bg-white/40 hover:bg-white"
+                      }`}
                   />
                 ))}
               </div>
@@ -358,32 +356,58 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {destinations.map((d) => (
-              <button
-                key={d.dest}
-                id={`dest-card-${d.dest.toLowerCase()}`}
-                onClick={() => {
-                  setFilterDestination(d.dest);
-                  setCurrentPage(1);
-                  document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="relative rounded-2xl overflow-hidden cursor-pointer group"
-                style={{ aspectRatio: "3/4" }}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+            {packages.slice(0, 6).map((pkg) => (
+              <div
+                key={pkg.id}
+                onClick={() => router.push(`/package/${pkg.id}`)}
+                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group border border-slate-100/80 text-left flex flex-col"
               >
-                <img
-                  src={d.img}
-                  alt={d.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                {/* Hover ring */}
-                <div className="absolute inset-0 rounded-2xl ring-0 group-hover:ring-3 ring-[#ea580c] transition-all duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 text-white text-left">
-                  <p className="text-2xl mb-0.5">{d.emoji}</p>
-                  <p className="font-black text-base leading-tight">{d.name}</p>
+                <div className="relative h-64 overflow-hidden shrink-0">
+                  <img
+                    src={pkgImage(pkg)}
+                    alt={pkg.title}
+                    onError={(e) => handleImgError(e, pkg)}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-slate-800 shadow-sm">
+                    {pkg.destination}
+                  </div>
+                  {(pkg as any).is_featured && (
+                    <div className="absolute top-4 right-4 bg-[#ea580c] text-white px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm">
+                      Featured
+                    </div>
+                  )}
                 </div>
-              </button>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-lg font-black text-slate-900 mb-4 line-clamp-2 leading-snug min-h-[56px]">
+                    {pkg.title}
+                  </h3>
+                  <div className="flex gap-2 mb-4 flex-wrap">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${(pkg as any).flight_included !== false ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
+                      ✈ Flight
+                    </span>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${pkg.hotel_name ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
+                      🏨 Hotel
+                    </span>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${(pkg as any).meal_plan ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
+                      🍽 {(pkg as any).meal_plan || "No Meals"}
+                    </span>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
+                    <div>
+                      <p className="text-xs text-slate-400 font-semibold mb-0.5">Starting from</p>
+                      <p className="text-2xl font-black text-[#ea580c]">
+                        Rs {pkg.base_price_mur?.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-[#ea580c] text-white font-black text-sm px-5 py-2.5 rounded-full group-hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/20">
+                      Explore →
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -414,9 +438,8 @@ export default function Home() {
                   <button
                     key={idx}
                     onClick={() => setSliderIndex(idx)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      idx === sliderIndex ? "w-8 bg-[#ea580c]" : "w-2 bg-slate-300 hover:bg-slate-400"
-                    }`}
+                    className={`h-2 rounded-full transition-all duration-300 ${idx === sliderIndex ? "w-8 bg-[#ea580c]" : "w-2 bg-slate-300 hover:bg-slate-400"
+                      }`}
                   />
                 ))}
               </div>
@@ -453,9 +476,11 @@ export default function Home() {
                             {pkg.destination}
                           </div>
                           {/* Featured ribbon */}
-                          <div className="absolute top-4 right-4 bg-[#ea580c] text-white px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm">
-                            Featured
-                          </div>
+                          {(pkg as any).is_featured && (
+                            <div className="absolute top-4 right-4 bg-[#ea580c] text-white px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm">
+                              Featured
+                            </div>
+                          )}
                         </div>
 
                         {/* Card body */}
@@ -539,11 +564,10 @@ export default function Home() {
             <button
               id="toggle-filters-btn"
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm transition-all ${
-                showFilters
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm transition-all ${showFilters
                   ? "bg-[#ea580c] text-white shadow-sm shadow-orange-500/30"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-              }`}
+                }`}
             >
               <Filter size={15} />
               {showFilters ? "Hide Filters" : "Filter & Search"}
@@ -648,11 +672,10 @@ export default function Home() {
                           onChange={(e) => { setFilterStars(e.target.value); setCurrentPage(1); }}
                           className="sr-only"
                         />
-                        <span className={`block text-center py-2.5 rounded-xl text-sm font-black border-2 transition-all ${
-                          filterStars === star.toString()
+                        <span className={`block text-center py-2.5 rounded-xl text-sm font-black border-2 transition-all ${filterStars === star.toString()
                             ? "bg-[#ea580c] text-white border-[#ea580c]"
                             : "bg-slate-50 text-slate-600 border-slate-200 hover:border-orange-300"
-                        }`}>
+                          }`}>
                           {star}★
                         </span>
                       </label>
@@ -664,11 +687,10 @@ export default function Home() {
                         onChange={(e) => { setFilterStars(e.target.value); setCurrentPage(1); }}
                         className="sr-only"
                       />
-                      <span className={`block text-center py-2.5 rounded-xl text-sm font-black border-2 transition-all ${
-                        filterStars === ""
+                      <span className={`block text-center py-2.5 rounded-xl text-sm font-black border-2 transition-all ${filterStars === ""
                           ? "bg-[#ea580c] text-white border-[#ea580c]"
                           : "bg-slate-50 text-slate-600 border-slate-200 hover:border-orange-300"
-                      }`}>
+                        }`}>
                         All
                       </span>
                     </label>
@@ -786,8 +808,8 @@ export default function Home() {
                             <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${pkg.hotel_name ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
                               🏨 Hotel
                             </span>
-                            <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${(pkg as any).meal_plans ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
-                              🍽 Meals
+                            <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${(pkg as any).meal_plan ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
+                              🍽 {(pkg as any).meal_plan || "No Meals"}
                             </span>
                           </div>
 
@@ -851,8 +873,8 @@ export default function Home() {
                             <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${pkg.hotel_name ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
                               🏨 Hotel
                             </span>
-                            <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${(pkg as any).meal_plans ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
-                              🍽 Meals
+                            <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${(pkg as any).meal_plan ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-300"}`}>
+                              🍽 {(pkg as any).meal_plan || "No Meals"}
                             </span>
                           </div>
                         </div>
@@ -905,10 +927,10 @@ export default function Home() {
       <section className="py-16 bg-slate-900 px-4">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { stat: "30+",   label: "Years of Experience" },
+            { stat: "30+", label: "Years of Experience" },
             { stat: "5,000+", label: "Happy Travellers" },
-            { stat: "50+",   label: "Destinations Covered" },
-            { stat: "IATA",  label: "Accredited Agency" },
+            { stat: "50+", label: "Destinations Covered" },
+            { stat: "IATA", label: "Accredited Agency" },
           ].map((item) => (
             <div key={item.stat} className="flex flex-col items-center">
               <span className="text-3xl md:text-4xl font-black text-[#ea580c] mb-1">{item.stat}</span>

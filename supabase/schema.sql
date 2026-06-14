@@ -38,6 +38,10 @@ CREATE TABLE public.packages (
   hotel_stars INT DEFAULT 4,
   description TEXT,
   image_url TEXT,
+  service_type VARCHAR(50) DEFAULT 'package',
+  flight_included BOOLEAN DEFAULT true,
+  meal_plan VARCHAR(100) DEFAULT 'Breakfast Included',
+  is_featured BOOLEAN DEFAULT false,
   is_active BOOLEAN DEFAULT true,
   is_archived BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())

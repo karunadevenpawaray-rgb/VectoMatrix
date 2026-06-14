@@ -419,6 +419,9 @@ export const initialPackages = [
     description: "Wander through desert dunes, ride camels, and enjoy a warm BBQ dinner under the stars.",
     is_active: true,
     is_archived: false,
+    is_featured: true,
+    flight_included: true,
+    meal_plan: "Half Board",
     created_at: "2026-06-11T10:00:00Z",
     gallery_images: [
       "https://images.unsplash.com/photo-1546412414-e1885259563a?auto=format&fit=crop&q=80&w=800",
