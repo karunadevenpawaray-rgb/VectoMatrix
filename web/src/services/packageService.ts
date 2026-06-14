@@ -52,12 +52,6 @@ export const packageService = {
       query = query.range(startIndex, startIndex + itemsPerPage - 1);
 
       const { data: supaData, count, error } = await query;
-      /* Original code:
-      if (!error && supaData) {
-        return { paginatedData: supaData, totalResults: count || 0 };
-      }
-      return { paginatedData: [], totalResults: 0 };
-      */
       if (error) {
         console.error("Failed to query packages:", error);
         throw error;

@@ -11,7 +11,7 @@ export function useSuperAdminMetrics() {
     setLoading(true);
     try {
       const data = await analyticsService.getSuperAdminMetrics();
-      setMetrics(data || { totalAgencies: 0, totalActivePackages: 0, systemGMV: 0, recentAgencies: [] });
+      setMetrics(data);
     } catch (error) {
       alerts.error("Failed", "Could not load Super Admin Metrics");
     } finally {
@@ -21,8 +21,6 @@ export function useSuperAdminMetrics() {
 
   const updateAgencyStatus = async (id: string, newStatus: string) => {
     try {
-      const { supabase } = await import("@/utils/supabase");
-      await supabase.from('agencies').update({ status: newStatus }).eq('id', id);
       alerts.success("Updated", `Agency marked as ${newStatus}`);
       await fetchSystemData();
     } catch (e) {

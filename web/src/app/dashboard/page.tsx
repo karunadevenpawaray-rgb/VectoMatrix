@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Building2, FileText, Compass, CheckCircle, Clock } from "lucide-react";
+import { supabase } from "@/utils/supabase";
 
 export default function CustomerDashboard() {
   const [activeTab, setActiveTab] = useState<"INQUIRIES" | "BOOKINGS">("INQUIRIES");
@@ -17,6 +18,8 @@ export default function CustomerDashboard() {
 
   const fetchDashboardData = async () => {
     setLoading(true);
+    
+    // Default fallback email
     let email = "jean@example.com";
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
@@ -25,22 +28,20 @@ export default function CustomerDashboard() {
     }
 
     // Live Supabase Fetch
-    const { supabase } = await import("@/utils/supabase");
-      const { data, error } = await supabase
-        .from('leads')
-        .select('*, package:packages(*)')
-        .eq('client_email', email)
-        .order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*, package:packages(*)')
+      .eq('client_email', email)
+      .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        setInquiries(data.filter((l: any) => l.status === 'PENDING'));
-        setBookings(data.filter((l: any) => l.status === 'CONVERTED' || l.status === 'CANCELLED'));
-        const first = data[0];
-        if (first?.client_name) {
-          setClientName(first.client_name.split(" ")[0].toUpperCase());
-        }
+    if (!error && data) {
+      setInquiries(data.filter((l: any) => l.status === 'PENDING'));
+      setBookings(data.filter((l: any) => l.status === 'CONVERTED' || l.status === 'CANCELLED'));
+      const first = data[0];
+      if (first?.client_name) {
+        setClientName(first.client_name.split(" ")[0].toUpperCase());
       }
-    // }
+    }
     setLoading(false);
   };
 
@@ -54,10 +55,13 @@ export default function CustomerDashboard() {
 
   const handleCancelBooking = async (id: string) => {
     if (confirm("Are you sure you want to cancel this booking?")) {
-      const { supabase } = await import("@/utils/supabase");
-      await supabase.from('leads').update({ status: 'CANCELLED' }).eq('id', id);
-      alert("Booking cancelled successfully.");
-      fetchDashboardData();
+      const { error } = await supabase.from('leads').update({ status: 'CANCELLED' }).eq('id', id);
+      if (error) {
+        alert("Error cancelling booking: " + error.message);
+      } else {
+        alert("Booking cancelled successfully.");
+        fetchDashboardData();
+      }
     }
   };
 
@@ -76,129 +80,164 @@ export default function CustomerDashboard() {
           </Link>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">ACTIVE INQUIRIES</p>
-              <p className="text-5xl font-black text-slate-900">{loading ? "..." : inquiries.length}</p>
-            </div>
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
-              <Clock size={32} />
-            </div>
-          </div>
-          <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">CONFIRMED TRIPS</p>
-              <p className="text-5xl font-black text-green-600">{loading ? "..." : bookings.length}</p>
-            </div>
-            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-green-500">
-              <CheckCircle size={32} />
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-red-600 to-rose-500 p-8 rounded-[2rem] shadow-lg text-white flex items-center justify-between relative overflow-hidden">
-            <div className="relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-100 mb-2">NEXT DESTINATION</p>
-              <p className="text-3xl font-black tracking-tight">DUBAI</p>
-              <p className="text-sm font-bold text-red-100 mt-1">AUGUST 2026</p>
-            </div>
-            <Compass size={80} className="absolute -right-4 -bottom-4 text-white opacity-20" />
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex space-x-8 mb-8 border-b-2 border-slate-200">
-          <button 
+        {/* Tabs */}
+        <div className="flex border-b border-slate-200 mb-8">
+          <button
+            className={`pb-4 px-6 font-black text-lg ${activeTab === "INQUIRIES" ? "border-b-2 border-red-600 text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
             onClick={() => setActiveTab("INQUIRIES")}
-            className={`pb-4 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] border-b-4 transition-all -mb-[2px] ${activeTab === "INQUIRIES" ? "border-red-600 text-red-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
           >
-            ACTIVE INQUIRIES
+            <div className="flex items-center gap-2">
+              <Compass className={`w-5 h-5 ${activeTab === "INQUIRIES" ? "text-red-600" : "text-slate-400"}`} />
+              <span>MY INQUIRIES ({inquiries.length})</span>
+            </div>
           </button>
-          <button 
+          <button
+            className={`pb-4 px-6 font-black text-lg ${activeTab === "BOOKINGS" ? "border-b-2 border-red-600 text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
             onClick={() => setActiveTab("BOOKINGS")}
-            className={`pb-4 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] border-b-4 transition-all -mb-[2px] ${activeTab === "BOOKINGS" ? "border-red-600 text-red-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
           >
-            CONFIRMED BOOKINGS
+            <div className="flex items-center gap-2">
+              <CheckCircle className={`w-5 h-5 ${activeTab === "BOOKINGS" ? "text-red-600" : "text-slate-400"}`} />
+              <span>MY BOOKINGS ({bookings.length})</span>
+            </div>
           </button>
         </div>
 
-        {/* Tab Content */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-          {activeTab === "INQUIRIES" && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 border-b border-slate-100">
-                  <tr>
-                    <th className="px-8 py-5 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">PACKAGE</th>
-                    <th className="px-8 py-5 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">AGENCY</th>
-                    <th className="px-8 py-5 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">SUBMITTED ON</th>
-                    <th className="px-8 py-5 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase text-right">STATUS</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {loading ? (
-                    <tr><td colSpan={4} className="px-8 py-12 text-center font-black tracking-widest text-slate-400 text-sm">LOADING YOUR DATA...</td></tr>
-                  ) : inquiries.length === 0 ? (
-                    <tr><td colSpan={4} className="px-8 py-12 text-center font-black tracking-widest text-slate-400 text-sm">NO ACTIVE INQUIRIES.</td></tr>
-                  ) : inquiries.map((inq) => (
-                    <tr key={inq.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-8 py-6">
-                        <p className="font-black text-slate-900 text-lg leading-tight">{inq.package?.title || inq.package_id}</p>
-                        <p className="text-sm font-bold text-slate-500 mt-1">Rs {inq.calculated_total_mur?.toLocaleString()}</p>
-                      </td>
-                      <td className="px-8 py-6 text-sm font-bold text-slate-600 flex items-center mt-3">
-                        <Building2 className="mr-2 w-4 h-4 text-slate-400" /> {inq.assigned_agency_id}
-                      </td>
-                      <td className="px-8 py-6 text-sm font-bold text-slate-500">{new Date(inq.created_at).toLocaleDateString()}</td>
-                      <td className="px-8 py-6 text-right">
-                        <span className="inline-flex items-center px-3 py-1 rounded-md text-[10px] font-black tracking-[0.2em] bg-yellow-50 text-yellow-600 border border-yellow-200">
-                          {inq.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {activeTab === "BOOKINGS" && (
-            <div className="p-8">
-              {loading ? (
-                 <p className="text-center py-12 font-black tracking-widest text-slate-400 text-sm">LOADING YOUR BOOKINGS...</p>
-              ) : bookings.length === 0 ? (
-                 <p className="text-center py-12 font-black tracking-widest text-slate-400 text-sm">NO CONFIRMED BOOKINGS YET.</p>
-              ) : bookings.map((bk) => (
-                <div key={bk.id} className="border border-slate-100 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between mb-6 last:mb-0 hover:shadow-md transition-shadow bg-slate-50/50">
-                  <div className="mb-6 md:mb-0">
-                    <div className="flex items-center space-x-4 mb-3">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-md text-[10px] font-black tracking-[0.2em] uppercase ${bk.status === 'CANCELLED' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-600 border border-green-200'}`}>
-                        {bk.status}
-                      </span>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">REF: {bk.id.substring(0, 8)}</span>
-                    </div>
-                    <h3 className="text-2xl font-black text-slate-900 leading-tight">{bk.package?.title || bk.package_id}</h3>
-                    <p className="text-xs font-black tracking-widest text-slate-500 mt-2 uppercase">OPERATED BY {bk.assigned_agency_id}</p>
+        {/* Content */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+          </div>
+        ) : (
+          <div>
+            {activeTab === "INQUIRIES" && (
+              <div>
+                {inquiries.length === 0 ? (
+                  <div className="text-center py-16 bg-white rounded-3xl shadow-sm border border-slate-200">
+                    <Compass className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-black text-slate-900 mb-2">No Active Inquiries</h3>
+                    <p className="text-slate-500 max-w-md mx-auto">You don't have any pending inquiries. Start browsing packages to make your next travel plan!</p>
+                    <Link href="/" className="inline-block mt-6 bg-red-600 text-white font-black py-3 px-8 rounded-2xl hover:bg-red-700 transition-colors">
+                      Browse Packages
+                    </Link>
                   </div>
-                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
-                    {bk.status !== 'CANCELLED' && (
-                      <button onClick={() => handleCancelBooking(bk.id)} className="text-[10px] tracking-[0.2em] uppercase font-black text-red-600 border-2 border-red-200 bg-red-50 px-6 py-3 rounded-xl hover:bg-red-100 transition-colors active:scale-95 text-center">
-                        CANCEL BOOKING
-                      </button>
-                    )}
-                    <button onClick={() => handleViewReceipt(bk.id)} className="text-[10px] tracking-[0.2em] uppercase font-black bg-white border-2 border-slate-200 text-slate-900 px-6 py-3 rounded-xl hover:bg-slate-50 transition-colors active:scale-95 text-center">
-                      VIEW RECEIPT
-                    </button>
-                    <button onClick={() => handleDownloadItinerary(bk.id)} className="text-[10px] tracking-[0.2em] uppercase font-black bg-slate-900 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-black transition-colors flex items-center justify-center active:scale-95">
-                      <FileText className="mr-2 w-4 h-4" /> DOWNLOAD ITINERARY
-                    </button>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {inquiries.map((inquiry) => (
+                      <div key={inquiry.id} className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="font-black text-lg text-slate-900">{inquiry.package?.title || 'Package Inquiry'}</h3>
+                            <p className="text-slate-500 text-sm">{inquiry.package?.destination || 'Destination'}</p>
+                          </div>
+                          <span className="bg-amber-100 text-amber-800 text-xs font-black px-3 py-1 rounded-full">PENDING</span>
+                        </div>
+                        
+                        <div className="flex items-center text-sm text-slate-500 mb-6">
+                          <Clock className="w-4 h-4 mr-2" />
+                          <span>Submitted: {new Date(inquiry.created_at).toLocaleDateString()}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-slate-900 font-black">Rs {(inquiry.calculated_total_mur || 0).toLocaleString()}</p>
+                            <p className="text-slate-500 text-sm">Estimated Total</p>
+                          </div>
+                          <Link 
+                            href={`/package/${inquiry.package_id}`} 
+                            className="bg-slate-900 text-white font-black py-2 px-6 rounded-2xl hover:bg-slate-800 transition-colors"
+                          >
+                            View Details
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                )}
+              </div>
+            )}
 
+            {activeTab === "BOOKINGS" && (
+              <div>
+                {bookings.length === 0 ? (
+                  <div className="text-center py-16 bg-white rounded-3xl shadow-sm border border-slate-200">
+                    <CheckCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-black text-slate-900 mb-2">No Bookings Yet</h3>
+                    <p className="text-slate-500 max-w-md mx-auto">You haven't made any bookings yet. Explore our packages and book your dream vacation!</p>
+                    <Link href="/" className="inline-block mt-6 bg-red-600 text-white font-black py-3 px-8 rounded-2xl hover:bg-red-700 transition-colors">
+                      Browse Packages
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {bookings.map((booking) => (
+                      <div key={booking.id} className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="font-black text-lg text-slate-900">{booking.package?.title || 'Booked Package'}</h3>
+                            <p className="text-slate-500 text-sm">{booking.package?.destination || 'Destination'}</p>
+                          </div>
+                          <span className={`text-xs font-black px-3 py-1 rounded-full ${
+                            booking.status === 'CONVERTED' 
+                              ? 'bg-emerald-100 text-emerald-800' 
+                              : 'bg-rose-100 text-rose-800'
+                          }`}>
+                            {booking.status === 'CONVERTED' ? 'CONFIRMED' : 'CANCELLED'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center text-sm text-slate-500 mb-6">
+                          <Clock className="w-4 h-4 mr-2" />
+                          <span>Booked: {new Date(booking.created_at).toLocaleDateString()}</span>
+                        </div>
+                        
+                        <div className="border-t border-slate-200 pt-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="text-slate-900 font-black">Rs {(booking.calculated_total_mur || 0).toLocaleString()}</p>
+                              <p className="text-slate-500 text-sm">Final Amount</p>
+                            </div>
+                            
+                            <div className="flex gap-3">
+                              <button 
+                                onClick={() => handleDownloadItinerary(booking.id)}
+                                className="flex items-center gap-2 bg-slate-100 text-slate-700 font-black py-2 px-4 rounded-2xl hover:bg-slate-200 transition-colors"
+                              >
+                                <FileText className="w-4 h-4" />
+                                <span>Itinerary</span>
+                              </button>
+                              
+                              <button 
+                                onClick={() => handleViewReceipt(booking.id)}
+                                className="flex items-center gap-2 bg-slate-900 text-white font-black py-2 px-4 rounded-2xl hover:bg-slate-800 transition-colors"
+                              >
+                                <FileText className="w-4 h-4" />
+                                <span>Receipt</span>
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {booking.status === 'CONVERTED' && (
+                            <div className="mt-4 pt-4 border-t border-slate-200 flex justify-end">
+                              <button 
+                                onClick={() => handleCancelBooking(booking.id)}
+                                className="text-rose-600 hover:text-rose-800 font-black text-sm flex items-center gap-1"
+                              >
+                                Cancel Booking
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,106 @@
+# VectoMatrix Travel & Tours Ltd
+
+The complete monorepo for the next-generation travel booking ecosystem, featuring a consumer web portal, B2B vendor portal, and native mobile app - all powered by a unified data layer.
+
+## 🏗️ Architecture Overview
+
+```
+vector-matrix-ecosystem/
+├── web/              # Consumer Web Portal (Next.js)
+├── admin/            # B2B Admin Portal (Next.js)
+├── mobile/           # Native Mobile App (Expo/React Native)
+└── packages/         # Shared libraries and utilities
+```
+
+## 🌐 Live Applications
+
+- **Consumer Web Portal** (`/web`): Direct-to-consumer booking platform with package discovery, comparison, and checkout flows
+- **B2B Admin Portal** (`/admin`): Agency management platform for inventory, leads, and analytics
+- **Mobile App** (`/mobile`): Native experience with offline booking capabilities
+
+## 🛠 Tech Stack
+
+- **Frontend Frameworks**: Next.js 16, React Native (Expo)
+- **Backend**: Supabase (PostgreSQL, Auth, Storage, Functions)
+- **Payment Processing**: Stripe
+- **Styling**: Tailwind CSS, React Native StyleSheet
+- **Deployment**: Vercel (web/admin), Expo OTA (mobile)
+
+## 📊 Data Layer
+
+Centralized PostgreSQL database via Supabase with:
+- Row Level Security (RLS) policies for multi-tenancy
+- Real-time subscriptions
+- Server-side analytics via PostgreSQL functions
+
+## 🔐 Authentication & Permissions
+
+- Multi-tenant architecture with agency-level data isolation
+- Role-based access controls via Supabase RLS
+- JWT-based sessions
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js v20+
+- npm or yarn
+- Supabase account
+
+### Local Development
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Set up environment variables for Supabase and Stripe
+
+3. Run individual apps:
+```bash
+# Consumer Web Portal
+cd web && npm run dev
+
+# B2B Admin Portal  
+cd admin && npm run dev
+
+# Mobile App
+cd mobile && npx expo start
+```
+
+## 📱 Mobile Offline-First Architecture
+
+The mobile app features true offline capabilities:
+- Local data persistence using Async Storage
+- Queue-based sync mechanism
+- Network-aware operations
+
+## 🔄 Deployment
+
+All applications are designed for cloud deployment:
+- Web/Admin: Deploy to Vercel with automatic environment propagation
+- Mobile: Publish to Expo OTA for instant over-the-air updates
+
+## 🏢 B2B Multi-Tenant SaaS
+
+The admin portal supports multiple travel agencies:
+- Isolated inventory and lead management
+- White-label customization options
+- Agency-specific branding and SMTP settings
+
+## 💳 Payment & Conversion
+
+Integrated payment flows:
+- Stripe checkout for direct bookings
+- Lead generation for high-touch sales
+- Automated email notifications
+
+## 📈 Analytics & Insights
+
+Built-in analytics dashboard:
+- Revenue tracking
+- Conversion metrics
+- Package performance
+- Agency-specific reporting
 # VectoMatrix Travel & Tours Ltd - Ecosystem Monorepo
 
 Welcome to the VectoMatrix Travel & Tours Ltd ecosystem repository. This project is a comprehensive multi-platform travel booking and management system, designed with a robust standalone architecture and a sophisticated offline-capable Mock Engine.

@@ -1,8 +1,9 @@
-// Lightweight Custom Mock i18n Implementation
+// Internationalization utility
 
 export type Locale = 'en' | 'fr' | 'ar';
 
-export const mockTranslations = {
+// In a real implementation, these would be loaded from external translation files
+export const translations = {
   en: {
     greeting: "Hello, Traveler!",
     search: "Search Packages",
@@ -29,8 +30,8 @@ export const mockTranslations = {
   }
 };
 
-export function getTranslation(locale: Locale, key: keyof typeof mockTranslations['en']) {
-  return mockTranslations[locale][key] || mockTranslations['en'][key];
+export function getTranslation(locale: Locale, key: keyof typeof translations['en']) {
+  return translations[locale][key] || translations['en'][key];
 }
 
 export function isRTL(locale: Locale) {
