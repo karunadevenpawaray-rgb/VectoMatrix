@@ -104,3 +104,7 @@ img {
   user-select: none;
   -webkit-user-drag: none;
 }
+
+input, textarea, select {
+  color: #000000 !important;
+}
