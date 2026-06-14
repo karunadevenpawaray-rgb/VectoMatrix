@@ -14,14 +14,19 @@ export default function AnalyticsPage() {
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      const data = await analyticsService.getAgencyMetrics('CURRENT_USER_AGENCY_ID');
-      setMetrics({
-        totalRevenue: data.revenueGenerated || 0,
-        totalLeads: data.totalLeads || 0,
-        conversionRate: data.conversionRate || 0,
-        recentActivity: data.recentActivity || [],
-        topPackage: data.topPackage || "Mauritius Explorer"
-      });
+      // Use the Alpha Travels UUID from seed.sql instead of invalid "CURRENT_USER_AGENCY_ID"
+      const data = await analyticsService.getAgencyMetrics('11111111-1111-1111-1111-111111111111');
+      if (data) {
+        setMetrics({
+          totalRevenue: data.revenueGenerated || 0,
+          totalLeads: data.totalLeads || 0,
+          conversionRate: data.conversionRate || 0,
+          recentActivity: data.recentActivity || [],
+          topPackage: data.topPackage || "Mauritius Explorer"
+        });
+      } else {
+        setMetrics(null);
+      }
     } catch (error) {
       alert("Failed to fetch analytics");
     } finally {
@@ -41,6 +46,14 @@ export default function AnalyticsPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      ) : !metrics ? (
+        <div className="bg-red-50 text-red-600 p-6 rounded-2xl border border-red-200 text-center">
+          <p className="font-bold text-lg mb-2">Failed to load analytics</p>
+          <p className="text-sm">We couldn't retrieve your data. Please ensure your database is connected or the mock engine is enabled.</p>
+          <button onClick={fetchMetrics} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-bold">
+            Try Again
+          </button>
         </div>
       ) : (
         <div className="space-y-8">
