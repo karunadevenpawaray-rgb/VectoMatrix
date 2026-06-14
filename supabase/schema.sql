@@ -6,7 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 2. TABLES
 
 -- SUPER ADMINS
-CREATE TABLE public.super_admins (
+CREATE TABLE IF NOT EXISTS public.super_admins (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   auth_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE public.super_admins (
 );
 
 -- AGENCIES (B2B Vendors)
-CREATE TABLE public.agencies (
+CREATE TABLE IF NOT EXISTS public.agencies (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   auth_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, -- Link to Supabase Auth
   name VARCHAR(255) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE public.agencies (
 );
 
 -- PACKAGES (Inventory)
-CREATE TABLE public.packages (
+CREATE TABLE IF NOT EXISTS public.packages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   agency_id UUID REFERENCES public.agencies(id) ON DELETE CASCADE NOT NULL,
   title VARCHAR(255) NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE public.packages (
 );
 
 -- LEADS / BOOKINGS
-CREATE TABLE public.leads (
+CREATE TABLE IF NOT EXISTS public.leads (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   package_id UUID REFERENCES public.packages(id) ON DELETE CASCADE NOT NULL,
   assigned_agency_id UUID REFERENCES public.agencies(id) ON DELETE CASCADE NOT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE public.leads (
 );
 
 -- AGENCY SETTINGS (Custom SMTP & Email Templates)
-CREATE TABLE public.agency_settings (
+CREATE TABLE IF NOT EXISTS public.agency_settings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   agency_id UUID REFERENCES public.agencies(id) ON DELETE CASCADE UNIQUE NOT NULL,
   
@@ -88,7 +88,7 @@ CREATE TABLE public.agency_settings (
 );
 
 -- BILLBOARDS (Hero slider)
-CREATE TABLE public.billboards (
+CREATE TABLE IF NOT EXISTS public.billboards (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   image_url TEXT NOT NULL,
   title VARCHAR(255),
@@ -102,7 +102,7 @@ CREATE TABLE public.billboards (
 );
 
 -- TENANT CONFIG (SaaS Configuration)
-CREATE TABLE public.tenant_config (
+CREATE TABLE IF NOT EXISTS public.tenant_config (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   tenant_name VARCHAR(255) NOT NULL DEFAULT 'VectoMatrix Travel & Tours',
   primary_color VARCHAR(50) DEFAULT '#ea580c',
@@ -124,40 +124,63 @@ ALTER TABLE public.billboards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tenant_config ENABLE ROW LEVEL SECURITY;
 
 -- SUPER ADMINS: Only super admins can see the super admin table
+DROP POLICY IF EXISTS "Super admins view super admins" ON public.super_admins;
 CREATE POLICY "Super admins view super admins" ON public.super_admins FOR SELECT USING (auth.uid() = auth_id);
 
 -- AGENCIES: Can read all, but only update their own profile (Super Admin can do all)
+DROP POLICY IF EXISTS "Agencies can view all profiles" ON public.agencies;
 CREATE POLICY "Agencies can view all profiles" ON public.agencies FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Agencies can update own profile" ON public.agencies;
 CREATE POLICY "Agencies can update own profile" ON public.agencies FOR UPDATE USING (auth.uid() = auth_id OR auth.uid() IN (SELECT auth_id FROM public.super_admins));
+
+DROP POLICY IF EXISTS "Agencies can insert own profile" ON public.agencies;
 CREATE POLICY "Agencies can insert own profile" ON public.agencies FOR INSERT WITH CHECK (auth.uid() = auth_id);
+
+DROP POLICY IF EXISTS "Super admin can manage agencies" ON public.agencies;
 CREATE POLICY "Super admin can manage agencies" ON public.agencies FOR ALL USING (auth.uid() IN (SELECT auth_id FROM public.super_admins));
 
 -- AGENCY SETTINGS: Agencies read/update their own settings
+DROP POLICY IF EXISTS "Agencies read own settings" ON public.agency_settings;
 CREATE POLICY "Agencies read own settings" ON public.agency_settings FOR SELECT USING (auth.uid() = agency_id);
+
+DROP POLICY IF EXISTS "Agencies update own settings" ON public.agency_settings;
 CREATE POLICY "Agencies update own settings" ON public.agency_settings FOR UPDATE USING (auth.uid() = agency_id);
+
+DROP POLICY IF EXISTS "Agencies insert own settings" ON public.agency_settings;
 CREATE POLICY "Agencies insert own settings" ON public.agency_settings FOR INSERT WITH CHECK (auth.uid() = agency_id);
 
 -- BILLBOARDS: Public read, Super Admin all
+DROP POLICY IF EXISTS "Public read active billboards" ON public.billboards;
 CREATE POLICY "Public read active billboards" ON public.billboards FOR SELECT USING (is_active = true);
 
 -- TENANT CONFIG: Public read, Super Admin all
+DROP POLICY IF EXISTS "Public read active tenant config" ON public.tenant_config;
 CREATE POLICY "Public read active tenant config" ON public.tenant_config FOR SELECT USING (is_active = true);
+
 -- PACKAGES: Anyone can read active packages. Agencies can fully manage their own packages. (Super Admin can do all)
+DROP POLICY IF EXISTS "Anyone can view active packages" ON public.packages;
 CREATE POLICY "Anyone can view active packages" ON public.packages FOR SELECT USING (is_active = true AND is_archived = false);
+
+DROP POLICY IF EXISTS "Agencies can manage own packages" ON public.packages;
 CREATE POLICY "Agencies can manage own packages" ON public.packages FOR ALL USING (
   agency_id IN (SELECT id FROM public.agencies WHERE auth_id = auth.uid()) 
   OR auth.uid() IN (SELECT auth_id FROM public.super_admins)
 );
 
 -- LEADS: Agencies can only see and update leads assigned to them. (Super Admin can do all)
+DROP POLICY IF EXISTS "Agencies can manage own leads" ON public.leads;
 CREATE POLICY "Agencies can manage own leads" ON public.leads FOR ALL USING (
   assigned_agency_id IN (SELECT id FROM public.agencies WHERE auth_id = auth.uid())
   OR auth.uid() IN (SELECT auth_id FROM public.super_admins)
 );
+
 -- Consumers can insert leads anonymously
+DROP POLICY IF EXISTS "Anyone can create leads" ON public.leads;
 CREATE POLICY "Anyone can create leads" ON public.leads FOR INSERT WITH CHECK (true);
 
 -- AGENCY SETTINGS: Agencies can fully manage their own settings. (Super Admin can do all)
+DROP POLICY IF EXISTS "Agencies can manage own settings" ON public.agency_settings;
 CREATE POLICY "Agencies can manage own settings" ON public.agency_settings FOR ALL USING (
   agency_id IN (SELECT id FROM public.agencies WHERE auth_id = auth.uid())
   OR auth.uid() IN (SELECT auth_id FROM public.super_admins)
@@ -235,30 +258,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-/* Redundant declaration commented out for safety:
--- BILLBOARDS (Promotional Slider)
-CREATE TABLE public.billboards (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title VARCHAR(255) NOT NULL,
-  subtitle VARCHAR(255),
-  image_url TEXT NOT NULL,
-  cta_text VARCHAR(100) DEFAULT 'Book Now',
-  cta_link VARCHAR(255) DEFAULT '/',
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
-);
-*/
-
 ALTER TABLE public.billboards ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view active billboards" ON public.billboards;
 CREATE POLICY "Anyone can view active billboards" ON public.billboards 
   FOR SELECT USING (is_active = true);
 
+DROP POLICY IF EXISTS "Super admin can manage billboards" ON public.billboards;
 CREATE POLICY "Super admin can manage billboards" ON public.billboards 
   FOR ALL USING (auth.uid() IN (SELECT auth_id FROM public.super_admins));
 
 -- SAAS MULTI-TENANT CONFIGURATION TABLES
-CREATE TABLE public.tenants (
+CREATE TABLE IF NOT EXISTS public.tenants (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL,
   subdomain VARCHAR(100) UNIQUE NOT NULL,
@@ -267,7 +278,7 @@ CREATE TABLE public.tenants (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
-CREATE TABLE public.tenant_plugins (
+CREATE TABLE IF NOT EXISTS public.tenant_plugins (
   tenant_id UUID REFERENCES public.tenants(id) ON DELETE CASCADE,
   plugin_name VARCHAR(100) NOT NULL,
   is_enabled BOOLEAN DEFAULT false,
@@ -278,10 +289,14 @@ CREATE TABLE public.tenant_plugins (
 ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tenant_plugins ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view tenants" ON public.tenants;
 CREATE POLICY "Anyone can view tenants" ON public.tenants FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Super admin can manage tenants" ON public.tenants;
 CREATE POLICY "Super admin can manage tenants" ON public.tenants FOR ALL USING (auth.uid() IN (SELECT auth_id FROM public.super_admins));
 
+DROP POLICY IF EXISTS "Anyone can view tenant plugins" ON public.tenant_plugins;
 CREATE POLICY "Anyone can view tenant plugins" ON public.tenant_plugins FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Super admin can manage tenant plugins" ON public.tenant_plugins;
 CREATE POLICY "Super admin can manage tenant plugins" ON public.tenant_plugins FOR ALL USING (auth.uid() IN (SELECT auth_id FROM public.super_admins));
-
-
