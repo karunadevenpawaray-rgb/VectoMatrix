@@ -114,6 +114,18 @@ CREATE TABLE IF NOT EXISTS public.tenant_config (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
+-- SCHEMA EVOLUTION COLUMNS (Ensure columns exist if tables were created in earlier iterations)
+ALTER TABLE public.agencies ADD COLUMN IF NOT EXISTS auth_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.agencies ADD COLUMN IF NOT EXISTS logo_url TEXT;
+ALTER TABLE public.billboards ADD COLUMN IF NOT EXISTS display_order INT DEFAULT 0;
+ALTER TABLE public.billboards ADD COLUMN IF NOT EXISTS cta_text VARCHAR(100) DEFAULT 'Book Now';
+ALTER TABLE public.billboards ADD COLUMN IF NOT EXISTS cta_link VARCHAR(255) DEFAULT '/';
+ALTER TABLE public.packages ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT false;
+ALTER TABLE public.packages ADD COLUMN IF NOT EXISTS meal_plan VARCHAR(100) DEFAULT 'Breakfast Included';
+ALTER TABLE public.packages ADD COLUMN IF NOT EXISTS flight_included BOOLEAN DEFAULT true;
+ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'UNPAID';
+ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS stripe_session_id TEXT;
+
 -- 3. ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.super_admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agencies ENABLE ROW LEVEL SECURITY;
