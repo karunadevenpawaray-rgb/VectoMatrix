@@ -7,6 +7,7 @@ import { useCompare } from "@/context/CompareContext";
 import { packageService } from "@/services/packageService";
 import { useRouter } from "next/navigation";
 import { Search, Loader2, Map, LayoutGrid, List, Filter, Plane, Hotel, Coffee, CarFront, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import SkeletonCard from "@/components/common/SkeletonCard";
 
 type Package = Database["public"]["Tables"]["packages"]["Row"] & {
   agency: Database["public"]["Tables"]["agencies"]["Row"];
@@ -31,6 +32,7 @@ export default function Home() {
 
   // Advanced Filters
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [filterDestination, setFilterDestination] = useState<string>("");
   const [filterMonth, setFilterMonth] = useState<string>("");
   const [filterStars, setFilterStars] = useState<string>("");
@@ -47,9 +49,21 @@ export default function Home() {
 
   const { selectedPackages, togglePackage } = useCompare();
 
+  // Debouncing logic for keyword search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setCurrentPage(1); // reset to page 1 on new search
+    }, 350);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
   useEffect(() => {
     fetchPackages();
-  }, [searchQuery, filterDestination, filterMonth, filterStars, priceRange, currentPage, itemsPerPage, sortBy]);
+  }, [debouncedSearchQuery, filterDestination, filterMonth, filterStars, priceRange, currentPage, itemsPerPage, sortBy]);
 
   useEffect(() => {
     const fetchBillboards = async () => {
@@ -152,7 +166,7 @@ export default function Home() {
     setLoading(true);
 
     const filters = {
-      searchQuery,
+      searchQuery: debouncedSearchQuery,
       filterDestination,
       filterMonth,
       filterStars,
@@ -781,9 +795,16 @@ export default function Home() {
 
           {/* ── Results ── */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-64 gap-4">
-              <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-[#ea580c] animate-spin" />
-              <p className="text-slate-500 font-semibold text-sm">Finding your perfect package...</p>
+            <div
+              className={
+                viewMode === "grid"
+                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12"
+                  : "flex flex-col gap-4 mb-12"
+              }
+            >
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <SkeletonCard key={idx} />
+              ))}
             </div>
 
           ) : packages.length === 0 ? (
