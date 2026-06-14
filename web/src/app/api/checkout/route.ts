@@ -3,7 +3,9 @@ import Stripe from 'stripe';
 // import { supabase } from '@/lib/supabaseClient';
 import { supabase } from '@/utils/supabase';
 
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+// Legacy mock flag commented out for safety:
+// const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+const USE_MOCK_DATA = (process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true)) || !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_mock';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
   apiVersion: '2026-05-27.dahlia',

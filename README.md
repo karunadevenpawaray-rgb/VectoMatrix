@@ -17,9 +17,8 @@ This repository is structured as an npm workspace monorepo:
 
 Please refer to the following documents in the `/docs` folder for detailed information:
 
-1. [Features & User Types](docs/FEATURES.md): Detailed breakdown of the system's capabilities and the different roles (Super Admin, Travel Agency, Consumer, Mobile User).
-2. [Deployment Guide](docs/DEPLOYMENT.md): Instructions on how to deploy the database, web app, admin app, and mobile app to production, and how to transition from Mock to Live data.
-3. [Testing Strategy](docs/TESTING.md): Guidelines for End-to-End, Unit, and Mobile testing, including offline state validation.
+1. [Architecture & Features](docs/ARCHITECTURE_AND_FEATURES.md): Detailed breakdown of the multi-tenant SaaS architecture, B2B/B2C features, mobile navigation structure, and core business/pricing logic.
+2. [Operations & Testing Guide](docs/OPERATIONS_AND_TESTING.md): Instructions on how to deploy the database, web app, admin app, and mobile app to production, transition from Mock to Live data, setup Stripe/Storage, manage error handling, and run test suites.
 
 ## Getting Started Locally
 

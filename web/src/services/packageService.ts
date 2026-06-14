@@ -4,7 +4,9 @@ import { sanitizeHTML } from "@/utils/sanitize";
 import { supabase } from "@/utils/supabase";
 import { mockEngine } from '@vectormatrix/mock-engine';
 
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+// Legacy mock flag commented out for safety:
+// const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true);
 
 export interface PackageFilters {
   searchQuery: string;

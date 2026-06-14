@@ -2,7 +2,9 @@ import { supabase } from '@/utils/supabase';
 
 // Analytics Service: Fetches metrics for B2B portal and Super Admin
 
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+// Legacy mock flag commented out for safety:
+// const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true);
 
 export const analyticsService = {
   async getAgencyMetrics(agencyId: string) {
@@ -45,12 +47,12 @@ export const analyticsService = {
       };
     }
 
-    // --- PREPARED SUPABASE AGGREGATION ---
-    /*
-    const { data, error } = await supabase.rpc('get_system_metrics');
-    if (error) throw error;
+    // --- LIVE SUPABASE AGGREGATION ---
+    const { data, error } = await supabase.rpc('get_superadmin_metrics');
+    if (error) {
+      console.error("Failed to fetch superadmin metrics:", error);
+      return null;
+    }
     return data;
-    */
-    return null;
   }
 };

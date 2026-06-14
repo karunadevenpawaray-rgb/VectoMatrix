@@ -1,6 +1,8 @@
 import { supabase } from '@/utils/supabase';
 
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+// Legacy mock flag commented out for safety:
+// const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true';
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true);
 
 export const authService = {
   async login(email: string, password: string): Promise<{ user: any, error: any }> {

@@ -10,6 +10,7 @@ export default function CustomerDashboard() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clientName, setClientName] = useState("CUSTOMER");
 
   useEffect(() => {
     fetchDashboardData();
@@ -17,23 +18,64 @@ export default function CustomerDashboard() {
 
   const fetchDashboardData = async () => {
     setLoading(true);
-    const allLeads = await mockEngine.getLeads();
-    setInquiries(allLeads.filter(l => l.status === 'PENDING'));
-    setBookings(allLeads.filter(l => l.status === 'CONVERTED' || l.status === 'CANCELLED'));
+    const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true);
+    
+    // Default fallback email
+    let email = "jean@example.com";
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      email = urlParams.get("email") || localStorage.getItem("vmx_customer_email") || "jean@example.com";
+      localStorage.setItem("vmx_customer_email", email);
+    }
+
+    if (USE_MOCK_DATA) {
+      const allLeads = await mockEngine.getLeads();
+      const pending = allLeads.filter(l => l.status === 'PENDING');
+      const converted = allLeads.filter(l => l.status === 'CONVERTED' || l.status === 'CANCELLED');
+      setInquiries(pending);
+      setBookings(converted);
+      const first = allLeads[0];
+      if (first?.client_name) {
+        setClientName(first.client_name.split(" ")[0].toUpperCase());
+      }
+    } else {
+      // Live Supabase Fetch
+      const { supabase } = await import("@/utils/supabase");
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*, package:packages(*)')
+        .eq('client_email', email)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setInquiries(data.filter((l: any) => l.status === 'PENDING'));
+        setBookings(data.filter((l: any) => l.status === 'CONVERTED' || l.status === 'CANCELLED'));
+        const first = data[0];
+        if (first?.client_name) {
+          setClientName(first.client_name.split(" ")[0].toUpperCase());
+        }
+      }
+    }
     setLoading(false);
   };
 
   const handleDownloadItinerary = (id: string) => {
-    alert(`Mock: Generating PDF Itinerary for booking ${id}...`);
+    alert(`Generating PDF Itinerary for booking ${id}...`);
   };
 
   const handleViewReceipt = (id: string) => {
-    alert(`Mock: Loading Payment Receipt for booking ${id}...`);
+    alert(`Loading Payment Receipt for booking ${id}...`);
   };
 
   const handleCancelBooking = async (id: string) => {
     if (confirm("Are you sure you want to cancel this booking?")) {
-      await mockEngine.updateLeadStatus(id, "CANCELLED");
+      const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ENGINE === 'true' && (typeof window !== 'undefined' ? window.location.hostname === 'localhost' : true);
+      if (USE_MOCK_DATA) {
+        await mockEngine.updateLeadStatus(id, "CANCELLED");
+      } else {
+        const { supabase } = await import("@/utils/supabase");
+        await supabase.from('leads').update({ status: 'CANCELLED' }).eq('id', id);
+      }
       alert("Booking cancelled successfully.");
       fetchDashboardData();
     }
@@ -46,7 +88,7 @@ export default function CustomerDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6">
           <div>
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.1] tracking-tight">WELCOME BACK,<br/><span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-rose-400">JEAN!</span></h1>
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.1] tracking-tight">WELCOME BACK,<br/><span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-rose-400">{clientName}!</span></h1>
             <p className="text-lg text-slate-500 mt-2">Manage your upcoming trips and inquiries.</p>
           </div>
           <Link href="/" className="bg-white border-2 border-slate-200 text-slate-900 font-black text-sm tracking-widest uppercase px-6 py-4 rounded-2xl shadow-sm hover:border-red-600 hover:text-red-600 transition-all active:scale-95">
