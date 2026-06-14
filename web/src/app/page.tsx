@@ -159,36 +159,60 @@ export default function Home() {
       "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&q=80&w=800", // Dubai Marina
       "https://images.unsplash.com/photo-1548199569-3e1c6aa8f469?auto=format&fit=crop&q=80&w=800", // Dubai desert dunes
       "https://images.unsplash.com/photo-1577724893765-2ec9484acfb5?auto=format&fit=crop&q=80&w=800", // Dubai at night
+      "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&q=80&w=800", // Luxury resort
+      "https://images.unsplash.com/photo-1448901592608-07b1b7ae3640?auto=format&fit=crop&q=80&w=800", // Palm Jumeirah
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800", // Traditional market
+      "https://images.unsplash.com/photo-1589652717521-10c0d092dea9?auto=format&fit=crop&q=80&w=800", // Dubai Creek
     ],
     MALAYSIA: [
       "https://images.unsplash.com/photo-1596422846543-75c6ff416766?auto=format&fit=crop&q=80&w=800", // KL Petronas towers
       "https://images.unsplash.com/photo-1555400038-063f5f1a5cb3?auto=format&fit=crop&q=80&w=800", // KL skyline dusk
       "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&q=80&w=800", // Langkawi beach
       "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800", // Malaysian rainforest
+      "https://images.unsplash.com/photo-1585079540032-9e02d9d3e74d?auto=format&fit=crop&q=80&w=800", // George Town street art
+      "https://images.unsplash.com/photo-1589394815804-964ce0ff96b8?auto=format&fit=crop&q=80&w=800", // Island beach
+      "https://images.unsplash.com/photo-1551641142-c8f40c70d730?auto=format&fit=crop&q=80&w=800", // Tea plantation
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800", // Night market
     ],
     SOUTH_AFRICA: [
       "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&q=80&w=800", // Cape Town Table Mountain
       "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&q=80&w=800", // African lion safari
       "https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&q=80&w=800", // Kruger Park safari
       "https://images.unsplash.com/photo-1531804226-23eb1b1cddbe?auto=format&fit=crop&q=80&w=800", // Cape Town aerial
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800", // Cape Winelands
+      "https://images.unsplash.com/photo-1589652717521-10c0d092dea9?auto=format&fit=crop&q=80&w=800", // Boulders Beach penguins
+      "https://images.unsplash.com/photo-1448901592608-07b1b7ae3640?auto=format&fit=crop&q=80&w=800", // Garden Route
+      "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&q=80&w=800", // Safari lodge
     ],
     RODRIGUES: [
       "https://images.unsplash.com/photo-1589394815804-964ce0ff96b8?auto=format&fit=crop&q=80&w=800", // Rodrigues lagoon
       "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800", // tropical beach
       "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80&w=800", // island paradise
       "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=800", // ocean beach
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800", // fishing village
+      "https://images.unsplash.com/photo-1589652717521-10c0d092dea9?auto=format&fit=crop&q=80&w=800", // mountain landscape
+      "https://images.unsplash.com/photo-1448901592608-07b1b7ae3640?auto=format&fit=crop&q=80&w=800", // local market
+      "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&q=80&w=800", // cliff views
     ],
     REUNION: [
       "https://images.unsplash.com/photo-1552554746-9d33261971dd?auto=format&fit=crop&q=80&w=800", // Réunion volcano
       "https://images.unsplash.com/photo-1596524430615-b46475ddff6e?auto=format&fit=crop&q=80&w=800", // Réunion coast
       "https://images.unsplash.com/photo-1467220369-2081f2a53bc9?auto=format&fit=crop&q=80&w=800", // tropical waterfall
       "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80&w=800", // island aerial
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800", // mountain trail
+      "https://images.unsplash.com/photo-1589652717521-10c0d092dea9?auto=format&fit=crop&q=80&w=800", // forest canopy
+      "https://images.unsplash.com/photo-1448901592608-07b1b7ae3640?auto=format&fit=crop&q=80&w=800", // coastal road
+      "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&q=80&w=800", // volcanic crater
     ],
     MALDIVES: [
       "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=800", // overwater bungalows
       "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&q=80&w=800", // crystal water
       "https://images.unsplash.com/photo-1540202404-d0f7b90b3028?auto=format&fit=crop&q=80&w=800", // Maldives aerial
       "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&q=80&w=800", // Maldives sunset
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800", // underwater marine life
+      "https://images.unsplash.com/photo-1589652717521-10c0d092dea9?auto=format&fit=crop&q=80&w=800", // beach picnic
+      "https://images.unsplash.com/photo-1448901592608-07b1b7ae3640?auto=format&fit=crop&q=80&w=800", // luxury resort
+      "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&q=80&w=800", // diving experience
     ],
   };
 
