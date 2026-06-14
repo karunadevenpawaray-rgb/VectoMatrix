@@ -1,213 +1,188 @@
 "use client";
 
-import { useState } from "react";
-import { useCompare } from "@/context/CompareContext";
-import { Database } from "@/types/supabase";
-import { Ship, Waves, Star, Anchor, Search, MapPin, Building2, Compass, Plane, Hotel, Coffee, CarFront } from "lucide-react";
-
-type Package = Database["public"]["Tables"]["packages"]["Row"] & {
-  agency?: Database["public"]["Tables"]["agencies"]["Row"];
-};
-
-const MOCK_CRUISES = [
-  {
-    id: "cruise-001",
-    title: "7-Night Mediterranean Sea Journey",
-    destination: "MEDITERRANEAN",
-    base_price_mur: 125000,
-    hotel_stars: 5,
-    travel_month: "July",
-    is_active: true,
-    is_archived: false,
-    created_at: new Date().toISOString(),
-    agency_id: "agency-1",
-    flight_included: false,
-    hotel_name: "Oceanic Symphony",
-    number_of_days: 7,
-    number_of_nights: 7,
-    image: "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&q=80&w=800",
-    agency: { id: "agency-1", name: "Royal Seas Ltd", status: "ACTIVE", created_at: "", contact_email: "", contact_person: "", joined: "", phone: "" }
-  },
-  {
-    id: "cruise-002",
-    title: "14-Night Caribbean Island Wanderer",
-    destination: "CARIBBEAN",
-    base_price_mur: 180000,
-    hotel_stars: 4,
-    travel_month: "December",
-    is_active: true,
-    is_archived: false,
-    created_at: new Date().toISOString(),
-    agency_id: "agency-2",
-    flight_included: true,
-    hotel_name: "Caribbean Princess",
-    number_of_days: 14,
-    number_of_nights: 14,
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800",
-    agency: { id: "agency-2", name: "Tropical Cruises", status: "ACTIVE", created_at: "", contact_email: "", contact_person: "", joined: "", phone: "" }
-  },
-  {
-    id: "cruise-003",
-    title: "4-Night Indian Ocean Relaxer",
-    destination: "INDIAN_OCEAN",
-    base_price_mur: 45000,
-    hotel_stars: 5,
-    travel_month: "October",
-    is_active: true,
-    is_archived: false,
-    created_at: new Date().toISOString(),
-    agency_id: "agency-1",
-    flight_included: false,
-    hotel_name: "Costa Serena",
-    number_of_days: 4,
-    number_of_nights: 4,
-    image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&q=80&w=800",
-    agency: { id: "agency-1", name: "Royal Seas Ltd", status: "ACTIVE", created_at: "", contact_email: "", contact_person: "", joined: "", phone: "" }
-  }
-];
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Search, MapPin, Star, Calendar, Users, Filter } from "lucide-react";
+import { packageService } from "@/services/packageService";
 
 export default function CruisesPage() {
+  const [cruises, setCruises] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const { selectedPackages, togglePackage } = useCompare();
+  const [selectedDestination, setSelectedDestination] = useState("all");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
 
-  const filteredCruises = MOCK_CRUISES.filter(c => 
-    c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.destination?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    fetchCruises();
+  }, []);
+
+  const fetchCruises = async () => {
+    setLoading(true);
+    try {
+      const filters = {
+        searchQuery,
+        filterDestination: selectedDestination === "all" ? "" : selectedDestination,
+        filterMonth: "",
+        filterStars: "",
+        priceRange: priceRange[1]
+      };
+      const { paginatedData } = await packageService.getFilteredPackages(filters, 1, 50);
+      // Filter for cruise-related packages (assuming they would be labeled as such)
+      const cruiseData = paginatedData.filter((pkg: any) => 
+        pkg.service_type === 'package' && 
+        (pkg.title.toLowerCase().includes('cruise') || 
+         pkg.description.toLowerCase().includes('cruise') ||
+         pkg.destination === 'CARIBBEAN' || 
+         pkg.destination === 'MEDITERRANEAN' || 
+         pkg.destination === 'ALASKA')
+      );
+      setCruises(cruiseData);
+    } catch (error) {
+      console.error("Error fetching cruises:", error);
+      setCruises([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCruises();
+  }, [searchQuery, selectedDestination, priceRange]);
+
+  const destinations = [
+    { id: "all", name: "All Destinations" },
+    { id: "CARIBBEAN", name: "Caribbean" },
+    { id: "MEDITERRANEAN", name: "Mediterranean" },
+    { id: "ALASKA", name: "Alaska" },
+    { id: "NORWAY", name: "Norway" },
+    { id: "DUBAI", name: "Dubai" },
+    { id: "SOUTH_AFRICA", name: "South Africa" },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-[family-name:var(--font-outfit)] pb-20">
-      {/* Premium Header Banner */}
-      <div className="relative w-full h-[160px] md:h-[200px] bg-slate-900 overflow-hidden mb-6">
-        <img 
-          src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&q=80&w=1920" 
-          alt="Cruises Ocean Banner" 
-          className="w-full h-full object-cover object-center opacity-80 select-none pointer-events-none" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-slate-950/20"></div>
+    <div className="min-h-screen bg-slate-50 py-12">
+      <div className="container mx-auto px-4 max-w-6xl">
         
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <div className="bg-red-600/90 text-white text-[9px] md:text-xs font-black uppercase tracking-[0.25em] px-4 py-1.5 rounded-full mb-2 shadow-md">
-            ★ SLOW CRUISES & OCEAN JOURNEYS ★
-          </div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight leading-none mb-1 uppercase drop-shadow-md">
-            Set Sail & Relax
-          </h1>
-          <p className="text-[10px] md:text-xs text-slate-200 max-w-xl font-medium tracking-wide drop-shadow-sm leading-relaxed">
-            Watch the sunset from the deck, feel the ocean breeze, and visit quiet coastal ports on a comfortable voyage.
+        {/* Header */}
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">LUXURY CRUISES</h1>
+          <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+            Sail to exotic destinations on board world-class vessels with premium amenities and entertainment.
           </p>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 max-w-7xl">
-        {/* Search Bar & Stats */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6">
-          <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search by destination, ship name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-600/50 outline-none text-sm font-semibold"
-            />
-          </div>
-          <div className="text-xs font-black text-slate-400 uppercase tracking-widest shrink-0">
-            {filteredCruises.length} Cruises Available
+        {/* Search and Filters */}
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search cruises..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-black focus:ring-4 focus:ring-black/5 outline-none font-bold text-slate-900 transition-all"
+              />
+            </div>
+            
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <select
+                value={selectedDestination}
+                onChange={(e) => setSelectedDestination(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-black focus:ring-4 focus:ring-black/5 outline-none font-bold text-slate-900 transition-all appearance-none"
+              >
+                {destinations.map((dest) => (
+                  <option key={dest.id} value={dest.id}>{dest.name}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <select
+                value={`${priceRange[0]}-${priceRange[1]}`}
+                onChange={(e) => {
+                  const [min, max] = e.target.value.split('-').map(Number);
+                  setPriceRange([min, max]);
+                }}
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-black focus:ring-4 focus:ring-black/5 outline-none font-bold text-slate-900 transition-all appearance-none"
+              >
+                <option value="0-100000">Any Price</option>
+                <option value="0-50000">Under Rs 50,000</option>
+                <option value="50000-100000">Rs 50,000 - 100,000</option>
+                <option value="100000-200000">Rs 100,000 - 200,000</option>
+                <option value="200000-1000000">Over Rs 200,000</option>
+              </select>
+            </div>
+            
+            <button 
+              onClick={fetchCruises}
+              className="bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center"
+            >
+              Apply Filters
+            </button>
           </div>
         </div>
 
         {/* Results */}
-        {filteredCruises.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-[2rem] shadow-sm border border-slate-100 group cursor-pointer">
-            <Waves className="w-12 h-12 text-slate-300 mx-auto mb-4 stroke-2 fill-transparent group-hover:fill-red-100 group-hover:text-red-500 transition-all" />
-            <h3 className="text-xl font-black text-gray-900">No cruises found</h3>
-            <p className="text-gray-500 mt-2 font-medium">Try checking your spelling or search terms.</p>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCruises.map((pkg) => {
-              const isComparing = selectedPackages.some((p) => p.id === pkg.id);
-              return (
-                <div key={pkg.id} className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] hover:-translate-y-1.5 transition-all duration-300 border border-slate-100 flex flex-col group">
-                  <div className="h-44 w-full relative shrink-0 flex items-center justify-center overflow-hidden bg-slate-900">
-                    <img 
-                      src={pkg.image}
-                      alt={pkg.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-95"
-                    />
-                    <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[8px] font-black text-gray-900 uppercase tracking-widest shadow-sm">
-                      {pkg.destination.replace("_", " ")}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {cruises.map((cruise) => (
+              <div key={cruise.id} className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="h-48 bg-slate-200 relative">
+                  <img 
+                    src={cruise.gallery_images?.[0] || "https://images.unsplash.com/photo-1531932705591-5a283da45070?auto=format&fit=crop&q=80&w=800"} 
+                    alt={cruise.title} 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-sm font-bold text-slate-900">
+                    {cruise.destination}
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-xl font-bold text-slate-900 line-clamp-2">{cruise.title}</h3>
+                    <div className="flex items-center bg-amber-100 px-2 py-1 rounded-lg">
+                      <Star className="w-4 h-4 text-amber-500 fill-current" />
+                      <span className="ml-1 text-sm font-bold text-amber-800">{cruise.hotel_stars || 4}.0</span>
                     </div>
                   </div>
                   
-                  <div className="p-4 flex-grow flex flex-col justify-between">
+                  <div className="flex items-center text-slate-500 text-sm mb-4">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    <span className="mr-4">{cruise.duration_nights || 7} nights</span>
+                    <Users className="w-4 h-4 mr-1" />
+                    <span>Up to {cruise.max_occupancy || 4} guests</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-black text-red-600 bg-red-50 border border-red-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                          {pkg.number_of_nights} Nights
-                        </span>
-                        <div className="flex text-amber-400 text-xs">
-                          {Array.from({ length: pkg.hotel_stars || 5 }).map((_, i) => (
-                            <span key={i}>★</span>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <span className="bg-red-50 border border-red-100 text-red-600 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider w-fit mb-2 block">
-                        {pkg.agency.name}
-                      </span>
-                      <h3 className="text-base font-black text-gray-900 mb-1 leading-snug line-clamp-1">{pkg.title}</h3>
-                      <p className="text-xs text-slate-500 line-clamp-3 mb-3 leading-relaxed">
-                        Settle in for a peaceful journey on the water. Watch sunsets, breathe the sea air, and visit coastal villages.
-                      </p>
-                      
-                      <div className="space-y-1.5 mb-3">
-                        <p className="text-xs text-slate-500 flex items-center font-bold">
-                          <Anchor className="mr-2 w-4 h-4 text-red-500" /> Ship: {pkg.hotel_name}
-                        </p>
-                        <p className="text-[10px] text-slate-400 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5 font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
-                          <Compass className="w-3.5 h-3.5 text-red-500" /> Sailing Month: {pkg.travel_month}
-                        </p>
-                      </div>
-                      <div className="flex gap-2.5 mb-2.5 mt-1.5 border-t border-slate-100/50 pt-2 flex-wrap">
-                        <div className={`flex items-center gap-1 text-[8px] font-extrabold tracking-wider ${pkg.flight_included ? "text-emerald-600" : "text-slate-300"}`}>
-                          <Plane size={11} /> FLIGHT
-                        </div>
-                        <div className="flex items-center gap-1 text-[8px] font-extrabold tracking-wider text-emerald-600">
-                          <Hotel size={11} /> HOTEL
-                        </div>
-                        <div className="flex items-center gap-1 text-[8px] font-extrabold tracking-wider text-emerald-600">
-                          <Coffee size={11} /> MEALS
-                        </div>
-                        <div className="flex items-center gap-1 text-[8px] font-extrabold tracking-wider text-slate-300">
-                          <CarFront size={11} /> TRANSFERS
-                        </div>
-                      </div>
+                      <span className="text-2xl font-black text-slate-900">Rs {cruise.base_price_mur.toLocaleString()}</span>
+                      <span className="text-slate-500 ml-2">per person</span>
                     </div>
-                    
-                    <div className="flex items-end justify-between mt-1 pt-2 border-t border-slate-100">
-                      <div>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Fare From</p>
-                        <p className="text-2xl font-black text-red-600">Rs {pkg.base_price_mur.toLocaleString()}</p>
-                      </div>
-                      
-                      <label className="flex items-center space-x-2 cursor-pointer group/compare bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 hover:bg-red-50 transition-colors">
-                        <input 
-                          type="checkbox" 
-                          checked={isComparing}
-                          onChange={() => togglePackage(pkg as unknown as Package)}
-                          className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-600/50 cursor-pointer accent-red-600"
-                        />
-                        <span className="text-[9px] font-black text-slate-600 group-hover/compare:text-red-600 transition-colors uppercase tracking-wider">
-                          Compare
-                        </span>
-                      </label>
-                    </div>
+                    <Link 
+                      href={`/package/${cruise.id}`} 
+                      className="bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 transition-colors"
+                    >
+                      View Details
+                    </Link>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {cruises.length === 0 && !loading && (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-bold text-slate-900 mb-2">No cruises found</h3>
+            <p className="text-slate-500">Try adjusting your search criteria</p>
           </div>
         )}
       </div>

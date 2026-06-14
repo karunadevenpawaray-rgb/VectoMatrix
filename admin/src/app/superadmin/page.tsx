@@ -17,16 +17,54 @@ export interface TenantConfig {
 import { Shield, Power } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { useSuperAdminMetrics } from "@/hooks/useSuperAdminMetrics";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/utils/supabase";
 
 export default function SuperAdminPage() {
+  const router = useRouter();
+  const [loadingAdminCheck, setLoadingAdminCheck] = useState(true);
   const { metrics, loading, updateAgencyStatus } = useSuperAdminMetrics();
   const [tenants, setTenants] = useState<TenantConfig[]>([]);
   const [activeTenant, setActiveTenantState] = useState<TenantConfig | null>(null);
 
+  /* Original useEffect commented out to preserve history:
   useEffect(() => {
     setTenants([]);
     setActiveTenantState(null);
   }, []);
+  */
+
+  useEffect(() => {
+    setTenants([]);
+    setActiveTenantState(null);
+
+    const checkSuperAdmin = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push("/b2b/login");
+          return;
+        }
+
+        const { data: superAdmin, error } = await supabase
+          .from("super_admins")
+          .select("id")
+          .eq("auth_id", session.user.id)
+          .single();
+
+        if (error || !superAdmin) {
+          router.push("/b2b/login");
+          return;
+        }
+
+        setLoadingAdminCheck(false);
+      } catch (err) {
+        router.push("/b2b/login");
+      }
+    };
+
+    checkSuperAdmin();
+  }, [router]);
 
   const handleTenantSelect = (id: string) => {
     // Live Supabase implementation goes here
@@ -35,6 +73,18 @@ export default function SuperAdminPage() {
   const handleTogglePlugin = (pluginKey: keyof TenantConfig["plugins"]) => {
     // Live Supabase implementation goes here
   };
+
+  if (loadingAdminCheck) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center p-6 text-center">
+        <div className="bg-gray-950 p-8 rounded-2xl border border-gray-800 shadow-sm max-w-md">
+          <div className="mx-auto h-12 w-12 border-b-2 border-blue-500 rounded-full animate-spin mb-4"></div>
+          <h1 className="text-xl font-bold text-white mb-2">Verifying Administrator Access</h1>
+          <p className="text-gray-400 text-sm">Please wait while we authenticate your admin credentials...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col md:flex-row">

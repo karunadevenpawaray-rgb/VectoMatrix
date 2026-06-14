@@ -129,6 +129,7 @@ CREATE POLICY "Super admins view super admins" ON public.super_admins FOR SELECT
 -- AGENCIES: Can read all, but only update their own profile (Super Admin can do all)
 CREATE POLICY "Agencies can view all profiles" ON public.agencies FOR SELECT USING (true);
 CREATE POLICY "Agencies can update own profile" ON public.agencies FOR UPDATE USING (auth.uid() = auth_id OR auth.uid() IN (SELECT auth_id FROM public.super_admins));
+CREATE POLICY "Agencies can insert own profile" ON public.agencies FOR INSERT WITH CHECK (auth.uid() = auth_id);
 CREATE POLICY "Super admin can manage agencies" ON public.agencies FOR ALL USING (auth.uid() IN (SELECT auth_id FROM public.super_admins));
 
 -- AGENCY SETTINGS: Agencies read/update their own settings

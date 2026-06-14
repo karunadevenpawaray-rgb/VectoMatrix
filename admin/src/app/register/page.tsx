@@ -12,6 +12,7 @@ export default function AgencyOnboarding() {
   const [agencyName, setAgencyName] = useState("");
   const [brn, setBrn] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,16 +20,35 @@ export default function AgencyOnboarding() {
     setLoading(true);
 
     try {
+      // 1. Sign up user in Supabase Auth
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+      });
+
+      if (signUpError) throw signUpError;
+      if (!signUpData.user) throw new Error("SignUp failed to return user data.");
+
+      // 2. Insert agency profile linked to user's auth_id
+      /* Original code:
       const { error } = await supabase.from('agencies').insert({
         name: agencyName,
         email: email,
         phone: phone,
         status: 'PENDING_VERIFICATION'
       });
+      */
+      const { error } = await supabase.from('agencies').insert({
+        name: agencyName,
+        email: email,
+        phone: phone,
+        auth_id: signUpData.user.id,
+        status: 'PENDING_VERIFICATION'
+      });
       if (error) throw error;
       setStep(3); // Go to success step
-    } catch (error) {
-      alert("Failed to register agency.");
+    } catch (error: any) {
+      alert("Failed to register agency: " + (error.message || error));
     } finally {
       setLoading(false);
     }
@@ -102,6 +122,15 @@ export default function AgencyOnboarding() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input 
+                  type="password" required 
+                  className="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                  placeholder="••••••••"
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Admin Phone Number</label>
                 <input 
                   type="tel" required 
@@ -120,7 +149,7 @@ export default function AgencyOnboarding() {
                 </button>
                 <button 
                   type="submit"
-                  disabled={loading || !email || !phone}
+                  disabled={loading || !email || !phone || !password}
                   className="flex-1 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center"
                 >
                   {loading ? "Verifying..." : "Complete Registration"}

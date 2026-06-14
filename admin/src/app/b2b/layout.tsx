@@ -8,6 +8,7 @@ import Link from "next/link";
 export default function B2BLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [agencyName, setAgencyName] = useState<string | null>(null);
+  const [agencyStatus, setAgencyStatus] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -19,21 +20,31 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      // In a real app, redirect to login page. For this spec, we'll simulate an auth block.
-      // router.push("/login");
-      setLoading(false);
+      router.push("/b2b/login");
       return;
     }
 
-    // Fetch the agency name matching the authenticated user
+    // Fetch the agency status and name matching the authenticated user
     const { data, error } = await supabase
       .from("agencies")
-      .select("name")
+      .select("name, status")
       .eq("auth_id", session.user.id)
       .single();
 
     if (data && !error) {
       setAgencyName(data.name);
+      setAgencyStatus(data.status);
+    } else {
+      // If auth user exists but has no agency profile, check if they are superadmin
+      const { data: superAdmin } = await supabase
+        .from('super_admins')
+        .select('id')
+        .eq('auth_id', session.user.id)
+        .single();
+      if (superAdmin) {
+        router.push("/superadmin");
+        return;
+      }
     }
     
     setLoading(false);
@@ -48,7 +59,28 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50">Loading Vendor Portal...</div>;
   }
 
-  // Fallback for UI visualization if user bypasses login in dev mode
+  if (agencyStatus && agencyStatus !== 'APPROVED' && agencyStatus !== 'ACTIVE') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-6 text-center">
+        <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm max-w-md">
+          <div className="mx-auto h-16 w-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-3xl">
+            ⏳
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Registration Under Review</h1>
+          <p className="text-gray-500 mb-6">
+            Your agency profile is currently pending verification. You will be able to access the vendor portal once approved by the Super Admin.
+          </p>
+          <button 
+            onClick={handleLogout}
+            className="w-full py-2.5 px-4 bg-gray-900 hover:bg-black text-white rounded-lg font-bold transition-all text-sm"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const currentAgency = agencyName || "Demo Agency (Unauthenticated)";
 
   return (

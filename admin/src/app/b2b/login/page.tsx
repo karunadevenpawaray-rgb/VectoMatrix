@@ -4,13 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/authService";
 
+import { supabase } from "@/utils/supabase";
+
 export default function VendorLogin() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-
+  /* Original handleLogin code commented out to preserve history:
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -22,6 +24,41 @@ export default function VendorLogin() {
     if (error) {
       alert("Auth Error: " + error.message);
     } else {
+      router.push("/b2b/inventory");
+    }
+  };
+  */
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { user, error } = await authService.login(email, password);
+    
+    if (error) {
+      setLoading(false);
+      alert("Auth Error: " + error.message);
+    } else if (user) {
+      try {
+        // Query the super_admins table to see if this user auth_id is a Super Admin
+        const { data: superAdmin, error: superAdminError } = await supabase
+          .from("super_admins")
+          .select("id")
+          .eq("auth_id", user.id)
+          .single();
+
+        setLoading(false);
+        if (superAdmin && !superAdminError) {
+          router.push("/superadmin");
+        } else {
+          router.push("/b2b/inventory");
+        }
+      } catch (err) {
+        setLoading(false);
+        router.push("/b2b/inventory");
+      }
+    } else {
+      setLoading(false);
       router.push("/b2b/inventory");
     }
   };
